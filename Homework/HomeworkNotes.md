@@ -1,0 +1,44 @@
+# NOTES
+
+## [Homework 1]()
+
+This homework was getting helped by AI for help understanding.<br>
+Link for AI : <br>
+
+This project works by using climbing techniques to find the fastest final distance. At first we started by making 10 random seed from 0 until 100 in coordinat of x and y. The program also will calculate the distance for each seed.
+```python
+random.seed(42)  # Ensures consistent coordinates across runs
+city_locations = {i: (random.randint(0, 100), random.randint(0, 100)) for i in range(10)}
+
+def calculate_distance(c1, c2):
+    (x1, y1), (x2, y2) = city_locations[c1], city_locations[c2]
+    # Standard Euclidean distance formula
+    return ((x1 - x2)**2 + (y1 - y2)**2)**0.5
+```
+
+After that program will trying the some method. The first method is using Hill Climbing. Hill Climbing Essentially, the program wants to find the highest "peak." The second method is neighbor (2-opt). The program selects two sections of road at random, then rotates their order so that the "crossed" roads become "straight"
+```python
+def height(self):
+        """Condition: Total Distance * -1 (Higher height = shorter distance)"""
+        total = 0
+        for i in range(len(self.route) - 1):
+            total += calculate_distance(self.route[i], self.route[i+1])
+        total += calculate_distance(self.route[-1], self.route[0])  # Return to start
+        return -total
+
+    def neighbor(self):
+        """Condition: 2-opt swap (a,b)(c,d) -> (a,d)(b,c)"""
+        new_route = list(self.route)
+        # Select two random indices
+        i, j = sorted(random.sample(range(len(new_route)), 2))
+        # Reverse the segment between i and j
+        new_route[i:j+1] = reversed(new_route[i:j+1])
+        return TSPSolution(new_route)
+```
+
+After that, the engine started when program by starting with a random route, for example, from house 1 to 10. The program will then:
+- Continue swapping the order of the houses.
+- Check the distance, if the swapping results in a shorter distance.
+- Give up: If the program has tried swapping up to 500 times but no other route options are found.
+
+## [Homework 2]()
