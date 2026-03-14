@@ -1,6 +1,6 @@
 # NOTES
 
-## [Homework 1]()
+## [Homework 1](https://github.com/ChristFarrell/_ml/blob/master/Homework/Homework%2001%20050326/Climb.py)
 
 This homework was getting helped by AI for help understanding.<br>
 Link for AI : <br>
@@ -41,8 +41,8 @@ After that, the engine started when program by starting with a random route, for
 - Check the distance, if the swapping results in a shorter distance.
 - Give up: If the program has tried swapping up to 500 times but no other route options are found.
 
-## [Homework 2]()
-Problem 1: $f(x, y, z) = (x \cdot y) + z$
+## [Homework 2](https://github.com/ChristFarrell/_ml/blob/master/Homework/Homework%2002%20120326/Manual%20Calculation%20of%20The%20Inverse%20Transit%20Algorithm.jpeg)
+Problem 1: $f(x, y, z) = (x \cdot y) + z$<br>
 In this computational graph, we first perform a Forward Pass where the inputs $x=1$ and $y=2$ are multiplied to produce an intermediate value of $2$, which is then added to $z=3$ to reach a final output of $5$.
 | Part | Operation / Variable | Chain Rule Formula | Final Gradient |
 | :--- | :--- | :--- | :--- |
@@ -52,7 +52,8 @@ In this computational graph, we first perform a Forward Pass where the inputs $x
 | **x** | Input $x$ | $\frac{\partial f}{\partial P} \cdot y$ | **2** |
 | **y** | Input $y$ | $\frac{\partial f}{\partial P} \cdot x$ | **1** |
 
-Problem 2: $f(x, y, z, t) = ((x \cdot y) + z) \cdot t$This model introduces an additional layer of complexity. In the Forward Pass, the product of $x(1)$ and $y(2)$ results in $2$, which is added to $z(3)$ to get a sub-total of $5$, and finally multiplied by $t(4)$ to yield a total of $20$.
+Problem 2: $f(x, y, z, t) = ((x \cdot y) + z) \cdot t$<br>
+In the Forward Pass, the product of $x(1)$ and $y(2)$ results in $2$, which is added to $z(3)$ to get a sub-total of $5$, and finally multiplied by $t(4)$ to yield a total of $20$.
 | Part | Operation / Variable | Chain Rule Formula | Final Gradient |
 | :--- | :--- | :--- | :--- |
 | **Final Multi** | $Q * t$ | $\frac{\partial f}{\partial Q}$ and $\frac{\partial f}{\partial t}$ | $Q \rightarrow 4, t \rightarrow 5$ |
