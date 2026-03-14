@@ -3,7 +3,7 @@
 ## [Homework 1](https://github.com/ChristFarrell/_ml/blob/master/Homework/Homework%2001%20050326/Climb.py)
 
 This homework was getting helped by AI for help understanding.<br>
-Link for AI : <br>
+Link for AI : https://gemini.google.com/share/63b6aadd2bfbb <br>
 
 This project works by using climbing techniques to find the fastest final distance. At first we started by making 10 random seed from 0 until 100 in coordinat of x and y. The program also will calculate the distance for each seed.
 ```python
