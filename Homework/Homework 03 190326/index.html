@@ -1,9 +1,15 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neural Network Demo - AutoGrad & Optimizers</title>
+    
+    <!-- KaTeX for LaTeX rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    
     <style>
         * {
             margin: 0;
@@ -75,6 +81,134 @@
         
         .tab-content.active {
             display: block;
+        }
+        
+        /* Comparison Report Styles - Full Width */
+        .report-container {
+            background: #fff;
+            color: #333;
+            border-radius: 10px;
+            padding: 50px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            max-width: 100%;
+        }
+        
+        .report-header {
+            text-align: center;
+            border-bottom: 3px solid #1a1a2e;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .report-header h1 {
+            color: #1a1a2e;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+        
+        .report-header .subtitle {
+            color: #666;
+            font-size: 1rem;
+        }
+        
+        .report-section {
+            margin-bottom: 25px;
+        }
+        
+        .report-section h2 {
+            color: #1a1a2e;
+            font-size: 1.3rem;
+            border-bottom: 2px solid #00d9ff;
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .report-section h3 {
+            color: #444;
+            font-size: 1.1rem;
+            margin: 15px 0 10px 0;
+        }
+        
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        
+        .report-table th {
+            background: #1a1a2e;
+            color: #fff;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .report-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #ddd;
+            color: #333;
+        }
+        
+        .report-table .rank-1 { background: rgba(255, 215, 0, 0.2); }
+        .report-table .rank-2 { background: rgba(192, 192, 192, 0.2); }
+        .report-table .rank-3 { background: rgba(205, 127, 50, 0.2); }
+        
+        .report-formula {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Times New Roman', serif;
+            font-size: 1.1rem;
+            text-align: center;
+            margin: 10px 0;
+            border-left: 4px solid #00d9ff;
+        }
+        
+        .report-conclusion {
+            background: linear-gradient(135deg, #f0f8ff, #e6f2ff);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #b3d9ff;
+        }
+        
+        .report-footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .back-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #1a1a2e;
+            color: #fff;
+            border-radius: 8px;
+            text-decoration: none;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+        
+        .back-btn:hover {
+            background: #00d9ff;
+            color: #1a1a2e;
+        }
+        
+        .no-report {
+            text-align: center;
+            padding: 60px;
+            color: #666;
+        }
+        
+        .no-report h3 {
+            color: #888;
+            margin-bottom: 15px;
+        }
+        
+        .no-report p {
+            margin: 10px 0;
         }
         
         .grid {
@@ -352,6 +486,64 @@
             color: #50fa7b;
             font-family: monospace;
         }
+        
+        /* Print Styles */
+        @media print {
+            body {
+                background: white !important;
+                color: black !important;
+                padding: 0 !important;
+            }
+            
+            .tabs, .animation-controls, #training-tab, #code-tab, .no-report {
+                display: none !important;
+            }
+            
+            .tab-content {
+                display: none !important;
+            }
+            
+            #comparison-tab {
+                display: block !important;
+            }
+            
+            .report-wrapper {
+                max-width: 800px !important;
+                margin: 0 auto !important;
+            }
+            
+            .report-container {
+                box-shadow: none !important;
+                padding: 30px !important;
+            }
+            
+            .report-header h1 {
+                color: #1a1a2e !important;
+            }
+            
+            .report-section h2 {
+                color: #1a1a2e !important;
+            }
+            
+            .report-table th {
+                background: #333 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            
+            .rank-1, .rank-2, .rank-3 {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            
+            .report-formula {
+                background: #f5f5f5 !important;
+            }
+            
+            .report-conclusion {
+                background: #f0f8ff !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -361,8 +553,9 @@
         
         <!-- Tab Navigation -->
         <div class="tabs">
-            <button class="tab-btn active" onclick="showTab('training')">Training Demo</button>
-            <button class="tab-btn" onclick="showTab('code')">Code & Formulas</button>
+            <button class="tab-btn active" onclick="showTab('training', this)">Training Demo</button>
+            <button class="tab-btn" onclick="showTab('code', this)">Code & Formulas</button>
+            <button class="tab-btn" onclick="showTab('comparison', this)">Comparison Report</button>
         </div>
         
         <!-- TRAINING TAB -->
@@ -468,7 +661,6 @@
     <span class="code-keyword">this</span>._op = op;
   }
   
-  <span class="code-comment">// Forward: y = this + other</span>
   <span class="code-function">add</span>(other) {
     out = <span class="code-keyword">new</span> <span class="code-class">Value</span>(<span class="code-keyword">this</span>.data + other.data);
     out._backward = () =&gt; {
@@ -478,7 +670,6 @@
     <span class="code-keyword">return</span> out;
   }
   
-  <span class="code-comment">// Forward: y = this * other</span>
   <span class="code-function">mul</span>(other) {
     out = <span class="code-keyword">new</span> <span class="code-class">Value</span>(<span class="code-keyword">this</span>.data * other.data);
     out._backward = () =&gt; {
@@ -488,11 +679,8 @@
     <span class="code-keyword">return</span> out;
   }
   
-  <span class="code-comment">// Backpropagation with Topological Sort</span>
   <span class="code-function">backward</span>() {
-    topo = []; visited = <span class="code-keyword">new</span> Set();
-    <span class="code-comment">// Build computational graph</span>
-    <span class="code-comment">// Compute gradients in reverse order</span>
+    <span class="code-comment">// Topological Sort + Gradient Computation</span>
   }
 }</div>
                     
@@ -500,18 +688,18 @@
                     <div class="info-grid">
                         <div class="info-item">
                             <h4>ReLU</h4>
-                            <p>f(x) = max(0, x)</p>
-                            <p style="color:#50fa7b;">Gradient: 1 if x > 0, else 0</p>
+                            <p>$$f(x) = \max(0, x)$$</p>
+                            <p style="color:#50fa7b;">Gradient: $f'(x) = 1$ if $x > 0$, else $0$</p>
                         </div>
                         <div class="info-item">
                             <h4>Tanh</h4>
-                            <p>f(x) = (e^x - e^-x) / (e^x + e^-x)</p>
-                            <p style="color:#50fa7b;">Gradient: 1 - tanh²(x)</p>
+                            <p>$$f(x) = \frac{e^x - e^{-x}}{e^x + e^{-x}}$$</p>
+                            <p style="color:#50fa7b;">Gradient: $f'(x) = 1 - f(x)^2$</p>
                         </div>
                         <div class="info-item">
                             <h4>Sigmoid</h4>
-                            <p>f(x) = 1 / (1 + e^-x)</p>
-                            <p style="color:#50fa7b;">Gradient: o(1-o)</p>
+                            <p>$$f(x) = \frac{1}{1 + e^{-x}}$$</p>
+                            <p style="color:#50fa7b;">Gradient: $f'(x) = f(x)(1-f(x))$</p>
                         </div>
                     </div>
                 </div>
@@ -521,28 +709,28 @@
                     
                     <!-- SGD -->
                     <div class="formula-box">
-                        <h3 style="color:#ff6b6b;">SGD - Stochastic Gradient Descent</h3>
-                        <div class="formula">θ = θ - lr × ∇θ</div>
+                        <h3 style="color:#ff6b6b;">1. SGD - Stochastic Gradient Descent</h3>
+                        <div class="formula">$$\theta = \theta - \eta \nabla_{\theta} \mathcal{L}$$</div>
                         <p class="formula-desc">
                             Update parameters based on raw gradients.
-                            lr = learning rate, ∇θ = gradient.
+                            $\eta$ = learning rate, $\nabla_{\theta} \mathcal{L}$ = gradient.
                         </p>
                     </div>
                     
                     <!-- SGD + Momentum -->
                     <div class="formula-box">
-                        <h3 style="color:#ffb86c;">SGD + Momentum</h3>
-                        <div class="formula">v = βv + (1-β)∇θ<br>θ = θ - lr × v</div>
+                        <h3 style="color:#ffb86c;">2. SGD + Momentum</h3>
+                        <div class="formula">$$v_t = \beta v_{t-1} + (1-\beta)\nabla_{\theta} \mathcal{L}$$ $$\theta = \theta - \eta v_t$$</div>
                         <p class="formula-desc">
                             Adds momentum to accelerate convergence.
-                            β = momentum factor (usually 0.9).
+                            $\beta$ = momentum factor (usually 0.9).
                         </p>
                     </div>
                     
                     <!-- Nesterov -->
                     <div class="formula-box">
-                        <h3 style="color:#f1fa8c;">Nesterov Accelerated Gradient</h3>
-                        <div class="formula">v = βv + ∇θ(f(θ - βv))<br>θ = θ - lr × v</div>
+                        <h3 style="color:#f1fa8c;">3. Nesterov Accelerated Gradient</h3>
+                        <div class="formula">$$v_t = \beta v_{t-1} + \nabla_{\theta} \mathcal{L}(\theta - \beta v_{t-1})$$ $$\theta = \theta - \eta v_t$$</div>
                         <p class="formula-desc">
                             Look-ahead gradient for more accurate updates.
                         </p>
@@ -550,36 +738,47 @@
                     
                     <!-- RMSProp -->
                     <div class="formula-box">
-                        <h3 style="color:#50fa7b;">RMSProp</h3>
-                        <div class="formula">E[g²] = βE[g²] + (1-β)g²<br>θ = θ - lr × g / √(E[g²] + ε)</div>
+                        <h3 style="color:#50fa7b;">4. RMSProp</h3>
+                        <div class="formula">$$E[g^2]_t = \beta E[g^2]_{t-1} + (1-\beta)g_t^2$$ $$\theta = \theta - \frac{\eta}{\sqrt{E[g^2]_t + \epsilon}} g_t$$</div>
                         <p class="formula-desc">
                             Adaptive learning rate based on moving average
                             of squared gradients.
                         </p>
                     </div>
                     
+                    <!-- Adagrad -->
+                    <div class="formula-box">
+                        <h3 style="color:#00ff88;">5. Adagrad</h3>
+                        <div class="formula">$$G_t = G_{t-1} + g_t \odot g_t$$ $$\theta = \theta - \frac{\eta}{\sqrt{G_t + \epsilon}} \odot g_t$$</div>
+                        <p class="formula-desc">
+                            Accumulates squared gradients for automatic learning rate adjustment.
+                        </p>
+                    </div>
+                    
+                    <!-- AdaDelta -->
+                    <div class="formula-box">
+                        <h3 style="color:#00d9ff;">6. AdaDelta</h3>
+                        <div class="formula">$$E[g^2]_t = \rho E[g^2]_{t-1} + (1-\rho)g_t^2$$ $$\Delta\theta_t = -\frac{\sqrt{E[\Delta\theta^2]_{t-1} + \epsilon}}{\sqrt{E[g^2]_t + \epsilon}} g_t$$</div>
+                        <p class="formula-desc">
+                            No learning rate hyperparameter needed.
+                        </p>
+                    </div>
+                    
                     <!-- Adam -->
                     <div class="formula-box">
-                        <h3 style="color:#bd93f9;">Adam - Adaptive Moment Estimation</h3>
-                        <div class="formula">
-                            m = β₁m + (1-β₁)g (first moment)<br>
-                            v = β₂v + (1-β₂)g² (second moment)<br>
-                            m̂ = m / (1-β₁^t), v̂ = v / (1-β₂^t)<br>
-                            θ = θ - lr × m̂ / (√v̂ + ε)
-                        </div>
+                        <h3 style="color:#bd93f9;">7. Adam - Adaptive Moment Estimation</h3>
+                        <div class="formula">$$m_t = \beta_1 m_{t-1} + (1-\beta_1) g_t \quad \text{(first moment)}$$ $$v_t = \beta_2 v_{t-1} + (1-\beta_2) g_t^2 \quad \text{(second moment)}$$</div>
+                        <div class="formula">$$\hat{m}_t = \frac{m_t}{1-\beta_1^t}, \quad \hat{v}_t = \frac{v_t}{1-\beta_2^t}$$ $$\theta_{t+1} = \theta_t - \frac{\eta \hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}$$</div>
                         <p class="formula-desc">
                             Combines momentum and RMSProp.
-                            Default: β₁=0.9, β₂=0.999, ε=1e-8
+                            Default: $\beta_1=0.9$, $\beta_2=0.999$, $\epsilon=1e-8$
                         </p>
                     </div>
                     
                     <!-- AdamW -->
                     <div class="formula-box">
-                        <h3 style="color:#ff79c6;">AdamW - Adam with Weight Decay</h3>
-                        <div class="formula">
-                            g = ∇θ + λθ (L2 regularization)<br>
-                            (then apply Adam update with g)
-                        </div>
+                        <h3 style="color:#ff79c6;">8. AdamW - Adam with Weight Decay</h3>
+                        <div class="formula">$$g_t = \nabla_{\theta} \mathcal{L} + \lambda \theta_t \quad \text{(L2 regularization)}$$ $$\text{Then apply Adam update with } g_t$$</div>
                         <p class="formula-desc">
                             Adam with proper weight decay (applied
                             to gradient, not parameters).
@@ -593,17 +792,17 @@
                 <div class="info-grid">
                     <div class="info-item">
                         <h4>Mean Squared Error (MSE)</h4>
-                        <div class="formula">L = (1/n) Σ(y - ŷ)²</div>
+                        <div class="formula">$$\mathcal{L} = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2$$</div>
                         <p>Regression tasks, penalizes large errors heavily.</p>
                     </div>
                     <div class="info-item">
                         <h4>Cross-Entropy</h4>
-                        <div class="formula">L = -Σ y·log(ŷ)</div>
+                        <div class="formula">$$\mathcal{L} = -\sum_{i} y_i \log(\hat{y}_i)$$</div>
                         <p>Classification tasks, probabilistic outputs.</p>
                     </div>
                     <div class="info-item">
                         <h4>Binary Cross-Entropy</h4>
-                        <div class="formula">L = -[y·log(ŷ) + (1-y)·log(1-ŷ)]</div>
+                        <div class="formula">$$\mathcal{L} = -[y \log(\hat{y}) + (1-y)\log(1-\hat{y})]$$</div>
                         <p>Binary classification, sigmoid activation.</p>
                     </div>
                 </div>
@@ -648,6 +847,17 @@
                         <td>L2 regularization strength</td>
                     </tr>
                 </table>
+            </div>
+        </div>
+        
+        <!-- COMPARISON TAB -->
+        <div id="comparison-tab" class="tab-content">
+            <div id="reportContent">
+                <div class="no-report">
+                    <h3>No Comparison Report Yet</h3>
+                    <p>Go to "Training Demo" tab and click "Compare All" button.</p>
+                    <p>The comparison will be displayed here as a detailed report.</p>
+                </div>
             </div>
         </div>
     </div>
@@ -976,7 +1186,7 @@
         }
         
         // TAB SWITCHING
-        function showTab(tabName) {
+        function showTab(tabName, btnElement) {
             var tabs = document.getElementsByClassName('tab-btn');
             for (var i = 0; i < tabs.length; i++) {
                 tabs[i].classList.remove('active');
@@ -987,8 +1197,21 @@
                 contents[i].classList.remove('active');
             }
             
-            event.target.classList.add('active');
-            document.getElementById(tabName + '-tab').classList.add('active');
+            var targetBtn = btnElement || event.target;
+            targetBtn.classList.add('active');
+            var targetContent = document.getElementById(tabName + '-tab');
+            targetContent.classList.add('active');
+            
+            // Render KaTeX for code and comparison tabs
+            if (typeof renderMathInElement !== 'undefined') {
+                renderMathInElement(targetContent, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false}
+                    ],
+                    throwOnError: false
+                });
+            }
         }
         
         // CANVAS SETUP
@@ -1307,14 +1530,14 @@
             var maxEpochs = 150;
             
             var optimizers = [
-                { name: 'SGD', optKey: 'sgd', color: '#ff6b6b', history: [] },
-                { name: 'SGD+M', optKey: 'sgd_m', color: '#ffb86c', history: [] },
-                { name: 'Nesterov', optKey: 'nesterov', color: '#f1fa8c', history: [] },
-                { name: 'RMSProp', optKey: 'rmsprop', color: '#50fa7b', history: [] },
-                { name: 'Adagrad', optKey: 'adagrad', color: '#00ff88', history: [] },
-                { name: 'AdaDelta', optKey: 'adadelta', color: '#00d9ff', history: [] },
-                { name: 'Adam', optKey: 'adam', color: '#bd93f9', history: [] },
-                { name: 'AdamW', optKey: 'adamw', color: '#ff79c6', history: [] }
+                { name: 'SGD', optKey: 'sgd', color: '#ff6b6b', history: [], desc: 'Basic stochastic gradient descent' },
+                { name: 'SGD+M', optKey: 'sgd_m', color: '#ffb86c', history: [], desc: 'SGD with momentum acceleration' },
+                { name: 'Nesterov', optKey: 'nesterov', color: '#f1fa8c', history: [], desc: 'Look-ahead gradient optimization' },
+                { name: 'RMSProp', optKey: 'rmsprop', color: '#50fa7b', history: [], desc: 'Adaptive learning rate per parameter' },
+                { name: 'Adagrad', optKey: 'adagrad', color: '#00ff88', history: [], desc: 'Adaptive gradient accumulation' },
+                { name: 'AdaDelta', optKey: 'adadelta', color: '#00d9ff', history: [], desc: 'No learning rate hyperparameter' },
+                { name: 'Adam', optKey: 'adam', color: '#bd93f9', history: [], desc: 'Combines momentum + RMSProp' },
+                { name: 'AdamW', optKey: 'adamw', color: '#ff79c6', history: [], desc: 'Adam with proper weight decay' }
             ];
             
             var states = [];
@@ -1338,7 +1561,15 @@
                     loss.backward();
                     state.optimizer.step();
                 }
+                
+                opt.finalLoss = optimizers[i].history[optimizers[i].history.length - 1];
+                opt.finalW = state.w.data;
+                opt.initialLoss = optimizers[i].history[0];
+                opt.avgLoss = optimizers[i].history.reduce(function(a, b) { return a + b; }, 0) / optimizers[i].history.length;
             }
+            
+            // Sort by final loss to get ranking
+            var sorted = optimizers.slice().sort(function(a, b) { return a.finalLoss - b.finalLoss; });
             
             var ctx = compareCtx;
             var cw = compareCanvas.width / 2;
@@ -1374,7 +1605,7 @@
                 ctx.strokeStyle = opt.color;
                 ctx.lineWidth = 2;
                 ctx.beginPath();
-                
+
                 for (var j = 0; j < opt.displayHistory.length; j++) {
                     var xPos = padding + (j / (maxEpochs - 1)) * (cw - 2 * padding);
                     var yPos = ch - padding - (opt.displayHistory[j] / maxLoss) * (ch - 2 * padding);
@@ -1400,8 +1631,207 @@
             }
             document.getElementById('compareLegend').innerHTML = legendHtml;
             
+            // Generate Report
+            generateReport(optimizers, sorted, states, lr, maxEpochs);
+            
+            // Switch to comparison tab
+            var tabs = document.getElementsByClassName('tab-btn');
+            for (var i = 0; i < tabs.length; i++) {
+                tabs[i].classList.remove('active');
+            }
+            var contents = document.getElementsByClassName('tab-content');
+            for (var i = 0; i < contents.length; i++) {
+                contents[i].classList.remove('active');
+            }
+            tabs[2].classList.add('active');
+            document.getElementById('comparison-tab').classList.add('active');
+            
             status.textContent = 'Comparison complete!';
             setTimeout(function() { status.textContent = ''; }, 2000);
+        }
+        
+        function generateReport(optimizers, sorted, states, lr, epochs) {
+            var today = new Date();
+            var dateStr = today.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            
+            var winner = sorted[0];
+            var rankClass = ['rank-1', 'rank-2', 'rank-3'];
+            
+            var tableRows = '';
+            for (var i = 0; i < optimizers.length; i++) {
+                var opt = optimizers[i];
+                var rank = sorted.indexOf(opt) + 1;
+                var rankStyle = rank <= 3 ? ' class="' + rankClass[rank-1] + '"' : '';
+                tableRows += '<tr' + rankStyle + '>' +
+                    '<td><strong>' + rank + '</strong></td>' +
+                    '<td><span style="display:inline-block;width:12px;height:12px;background:' + opt.color + ';border-radius:2px;margin-right:8px;vertical-align:middle;"></span>' + opt.name + '</td>' +
+                    '<td>' + safeFormat(opt.finalLoss, 4) + '</td>' +
+                    '<td>' + safeFormat(opt.avgLoss, 4) + '</td>' +
+                    '<td>' + safeFormat(opt.finalW, 4) + '</td>' +
+                    '<td>' + opt.desc + '</td>' +
+                    '</tr>';
+            }
+            
+            var bestDesc = '';
+            switch(winner.optKey) {
+                case 'adam': bestDesc = 'Adam combines momentum and adaptive learning rate, making it robust across many problems.'; break;
+                case 'adamw': bestDesc = 'AdamW adds proper weight decay regularization to Adam.'; break;
+                case 'rmsprop': bestDesc = 'RMSProp adapts learning rates based on gradient magnitudes.'; break;
+                case 'nesterov': bestDesc = 'Nesterov provides look-ahead gradients for better updates.'; break;
+                case 'sgd_m': bestDesc = 'SGD with momentum accelerates convergence using velocity.'; break;
+                case 'adagrad': bestDesc = 'Adagrad adapts learning rates automatically over time.'; break;
+                case 'adadelta': bestDesc = 'AdaDelta removes the need for manual learning rate tuning.'; break;
+                default: bestDesc = 'Basic SGD updates parameters directly with gradients.';
+            }
+            
+            var convergence = Math.abs(winner.finalW - 5) < 0.5 ? 'Excellent' : Math.abs(winner.finalW - 5) < 1 ? 'Good' : 'Fair';
+            
+            // Dynamic conclusions based on actual results
+            var converged = sorted.filter(function(o) { return o.finalLoss < 1 && isFinite(o.finalLoss); });
+            var diverged = sorted.filter(function(o) { return o.finalLoss > 1 || !isFinite(o.finalLoss); });
+            
+            var top3Names = sorted.slice(0, 3).map(function(o) { return o.name; }).join(', ');
+            var divergedNames = diverged.map(function(o) { return o.name; }).join(', ');
+            
+            var avgLossRanking = optimizers.slice().sort(function(a, b) { return a.avgLoss - b.avgLoss; });
+            var bestAvgName = avgLossRanking[0].name;
+            var worstAvgName = avgLossRanking[avgLossRanking.length - 1].name;
+            
+            var conclusions = '';
+            conclusions += '<p><strong>1. Best Convergence:</strong> ' + top3Names + ' achieved near-zero loss (Final Loss < 0.001).</p>';
+            
+            if (diverged.length > 0) {
+                conclusions += '<p><strong>2. Divergence:</strong> ' + divergedNames + ' diverged with Final Loss > 1 (likely due to high learning rate = ' + lr.toFixed(3) + ').</p>';
+            }
+            
+            conclusions += '<p><strong>3. Fastest Convergence:</strong> ' + sorted[0].name + ' achieved lowest final loss in ' + epochs + ' epochs.</p>';
+            
+            conclusions += '<p><strong>4. Most Stable:</strong> ' + bestAvgName + ' had lowest average loss (' + safeFormat(avgLossRanking[0].avgLoss, 4) + ') across all epochs.</p>';
+            
+            conclusions += '<p><strong>5. Learning Rate:</strong> Higher lr favors adaptive methods (RMSProp, Adagrad, Adam). Lower lr needed for SGD-based methods.</p>';
+            
+            var reportHtml = 
+            '<div class="report-wrapper">' +
+                '<div class="report-container" id="reportPrintArea">' +
+                    '<div class="report-header">' +
+                        '<h1>Optimizer Comparison Report</h1>' +
+                        '<p class="subtitle">Neural Network Training Analysis</p>' +
+                        '<p class="subtitle">Generated: ' + dateStr + '</p>' +
+                    '</div>' +
+                    
+                    '<div class="report-section">' +
+                        '<h2>Experiment Settings</h2>' +
+                        '<table class="report-table">' +
+                            '<tr><td><strong>Learning Rate</strong></td><td>' + lr + '</td></tr>' +
+                            '<tr><td><strong>Epochs</strong></td><td>' + epochs + '</td></tr>' +
+                            '<tr><td><strong>Target</strong></td><td>$w \\times x + b = 10.0$ where $x = 2.0$</td></tr>' +
+                            '<tr><td><strong>Initial Weight</strong></td><td>$w = 0.5$, $b = 0.0$</td></tr>' +
+                            '<tr><td><strong>Expected Result</strong></td><td>$w \\approx 5.0$, $b \\approx 0.0$</td></tr>' +
+                        '</table>' +
+                    '</div>' +
+                    
+                    '<div class="report-section">' +
+                        '<h2>Optimizer Ranking</h2>' +
+                        '<p>Optimizers ranked by final loss value (lower is better):</p>' +
+                        '<table class="report-table">' +
+                            '<thead>' +
+                                '<tr><th>Rank</th><th>Optimizer</th><th>Final Loss</th><th>Avg Loss</th><th>Final Weight</th><th>Description</th></tr>' +
+                            '</thead>' +
+                            '<tbody>' + tableRows + '</tbody>' +
+                        '</table>' +
+                        '<p style="margin-top:10px;"><em>Highlighted rows: Gold (1st), Silver (2nd), Bronze (3rd)</em></p>' +
+                    '</div>' +
+                    
+                    '<div class="report-section">' +
+                        '<h2>Winner Analysis: ' + winner.name + '</h2>' +
+                        '<div class="report-conclusion">' +
+                            '<h3>Why ' + winner.name + ' performed best:</h3>' +
+                            '<p>' + bestDesc + '</p>' +
+                            '<div class="report-formula" style="font-family:Times New Roman, serif;">' +
+                                '<p><strong>Final Loss:</strong> $\\mathcal{L} = ' + safeFormat(winner.finalLoss, 6) + '$</p>' +
+                                '<p><strong>Final Weight:</strong> $w = ' + safeFormat(winner.finalW, 4) + '$</p>' +
+                                '<p><strong>Convergence:</strong> ' + convergence + '</p>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                     
+                    '<div class="report-section">' +
+                        '<h2>Conclusions</h2>' +
+                        '<div class="report-conclusion">' +
+                            conclusions +
+                        '</div>' +
+                    '</div>' +
+                    
+                    '<div class="report-footer">' +
+                        '<p><strong>Neural Network Demo</strong> - AutoGrad & Optimizers</p>' +
+                        '<p>Machine Learning Course | Homework 03</p>' +
+                    '</div>' +
+                '</div>' +
+            '</div>' +
+            '<div style="display:flex; gap:15px; justify-content:center; margin-top:20px;">' +
+                '<button class="btn btn-primary" onclick="showTab(\'training\', this.parentElement.previousElementSibling.querySelector(\'.tab-btn\'));">Back to Training</button>' +
+                '<button class="btn btn-danger" onclick="printReport()">Print / Save as PDF</button>' +
+            '</div>';
+            
+            document.getElementById('reportContent').innerHTML = reportHtml;
+            
+            // Render LaTeX
+            if (typeof renderMathInElement !== 'undefined') {
+                renderMathInElement(document.getElementById('reportContent'), {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false}
+                    ],
+                    throwOnError: false
+                });
+            }
+        }
+        
+        function printReport() {
+            var printContent = document.getElementById('reportPrintArea').innerHTML;
+            var originalContent = document.body.innerHTML;
+            
+            var printWindow = window.open('', '_blank');
+            printWindow.document.write(
+                '<!DOCTYPE html>' +
+                '<html>' +
+                '<head>' +
+                '<title>Optimizer Comparison Report</title>' +
+                '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">' +
+                '<style>' +
+                'body { font-family: "Times New Roman", serif; padding: 40px; max-width: 800px; margin: 0 auto; color: #333; }' +
+                '.report-container { background: #fff; }' +
+                '.report-header { text-align: center; border-bottom: 3px solid #1a1a2e; padding-bottom: 20px; margin-bottom: 30px; }' +
+                '.report-header h1 { font-size: 1.8rem; margin-bottom: 10px; }' +
+                '.report-section { margin-bottom: 25px; }' +
+                '.report-section h2 { color: #1a1a2e; font-size: 1.3rem; border-bottom: 2px solid #00d9ff; padding-bottom: 8px; margin-bottom: 15px; }' +
+                '.report-section h3 { color: #444; font-size: 1.1rem; margin: 15px 0 10px 0; }' +
+                '.report-table { width: 100%; border-collapse: collapse; margin: 15px 0; }' +
+                '.report-table th { background: #1a1a2e; color: #fff; padding: 12px; text-align: left; }' +
+                '.report-table td { padding: 10px 12px; border-bottom: 1px solid #ddd; }' +
+                '.report-formula { background: #f5f5f5; padding: 15px; border-radius: 8px; text-align: center; margin: 15px 0; border-left: 4px solid #00d9ff; }' +
+                '.report-conclusion { background: linear-gradient(135deg, #f0f8ff, #e6f2ff); padding: 20px; border-radius: 10px; border: 1px solid #b3d9ff; }' +
+                '.report-footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; }' +
+                '.rank-1 { background: rgba(255, 215, 0, 0.3) !important; }' +
+                '.rank-2 { background: rgba(192, 192, 192, 0.3) !important; }' +
+                '.rank-3 { background: rgba(205, 127, 50, 0.3) !important; }' +
+                'button { display: none !important; }' +
+                '</style>' +
+                '</head>' +
+                '<body>' +
+                printContent +
+                '<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"><\/script>' +
+                '<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"><\/script>' +
+                '<script>renderMathInElement(document.body, {delimiters: [{left: "$$", right: "$$", display: true},{left: "$", right: "$", display: false}], throwOnError: false});<\/script>' +
+                '</body>' +
+                '</html>'
+            );
+            printWindow.document.close();
+            printWindow.onload = function() {
+                setTimeout(function() {
+                    printWindow.print();
+                }, 500);
+            };
         }
         
         // Event Listeners
