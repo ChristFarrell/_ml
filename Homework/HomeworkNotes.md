@@ -42,6 +42,7 @@ After that, the engine started when program by starting with a random route, for
 - Give up: If the program has tried swapping up to 500 times but no other route options are found.
 
 ## [Homework 2](https://github.com/ChristFarrell/_ml/blob/master/Homework/Homework%2002%20120326/Manual%20Calculation%20of%20The%20Inverse%20Transit%20Algorithm.jpeg)
+
 Problem 1: $f(x, y, z) = (x \cdot y) + z$<br>
 In this computational graph, we first perform a Forward Pass where the inputs $x=1$ and $y=2$ are multiplied to produce an intermediate value of $2$, which is then added to $z=3$ to reach a final output of $5$.
 | Part | Operation / Variable | Chain Rule Formula | Final Gradient |
