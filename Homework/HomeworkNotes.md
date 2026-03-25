@@ -64,3 +64,98 @@ In the Forward Pass, the product of $x(1)$ and $y(2)$ results in $2$, which is a
 | **First Multi** | $x * y$ | $\frac{\partial f}{\partial P}$ | **4** |
 | **x** | Input $x$ | $\frac{\partial f}{\partial P} \cdot y$ | **8** |
 | **y** | Input $y$ | $\frac{\partial f}{\partial P} \cdot x$ | **4** |
+
+## [Homework 3](https://github.com/ChristFarrell/_ml/tree/master/Homework/Homework%2003%20190326)
+
+This homework was getting helped by Opencode AI for help understanding.<br>
+
+This project demonstrates fundamental concepts in Neural Networks including:
+- **AutoGrad Engine** - Automatic differentiation
+- **8 Optimizers** - SGD, Momentum, Nesterov, RMSProp, Adagrad, AdaDelta, Adam, AdamW
+- **Gradient Descent** - Training with live visualization
+
+Value Class (AutoGrad)
+The `Value` class is the fundamental unit that tracks:
+- **data**: The actual value
+- **grad**: The gradient (derivative)
+- **_prev**: Children nodes (computation graph)
+- **_backward**: Function to compute gradients
+
+Forward & Backward Pass
+```python
+w = Value(0.5)      # weight
+x = Value(2.0)       # input
+b = Value(0.0)       # bias
+
+logit = w * x + b   # forward: 0.5 * 2.0 + 0.0 = 1.0
+```
+
+**Backward Pass**: Compute gradients via chain rule
+```python
+loss = (logit - 10) ** 2  # MSE: (1.0 - 10)^2 = 81
+loss.backward()           # compute d(loss)/dw, d(loss)/db
+```
+
+Optimizers, All optimizers update parameters using the general form:
+
+$$\theta_{t+1} = \theta_t - \eta \cdot \nabla_{\theta} \mathcal{L}$$
+
+where $\eta$ is the learning rate and $\nabla_{\theta} \mathcal{L}$ is the gradient.
+
+| # | Optimizer | Update Formula | Characteristics |
+|:-:|:---------:|:--------------|:---------------|
+| 1 | **SGD** (Stochastic Gradient Descent) | $\theta_{t+1} = \theta_t - \eta \nabla_{\theta} \mathcal{L}$ | Simplest optimizer. Updates based on raw gradient. Can get stuck in local minima. |
+| 2 | **SGD + Momentum** | $v_t = \beta v_{t-1} + (1-\beta)\nabla_{\theta}\mathcal{L}$ | Adds velocity to escape local minima. $\beta$ typically = 0.9. |
+| 3 | **Nesterov Accelerated Gradient** | $v_t = \beta v_{t-1} + \nabla_{\theta}\mathcal{L}(\theta_t - \beta v_{t-1})$ | "Look-ahead" gradient. More accurate than standard momentum. |
+| 4 | **RMSProp** | $E[g^2]_t = \beta E[g^2]_{t-1} + (1-\beta)g_t^2$<br>$\theta_{t+1} = \theta_t - \frac{\eta}{\sqrt{E[g^2]_t + \epsilon}} g_t$ | Adaptive learning rate per parameter. Good for non-stationary problems. |
+| 5 | **Adagrad** | $G_t = G_{t-1} + g_t \odot g_t$<br>$\theta_{t+1} = \theta_t - \frac{\eta}{\sqrt{G_t + \epsilon}} \odot g_t$ | Accumulates squared gradients. Automatically adjusts learning rate. |
+| 6 | **AdaDelta** | $E[g^2]_t = \rho E[g^2]_{t-1} + (1-\rho)g_t^2$<br>$\Delta\theta_t = -\frac{\sqrt{E[\Delta\theta^2]_{t-1}+\epsilon}}{\sqrt{E[g^2]_t+\epsilon}}g_t$ | No learning rate hyperparameter. Uses running average of gradient changes. |
+| 7 | **Adam** (Adaptive Moment Estimation) | $m_t = \beta_1 m_{t-1} + (1-\beta_1)g_t$<br>$v_t = \beta_2 v_{t-1} + (1-\beta_2)g_t^2$<br>$\hat{m}_t = \frac{m_t}{1-\beta_1^t}, \hat{v}_t = \frac{v_t}{1-\beta_2^t}$<br>$\theta_{t+1} = \theta_t - \frac{\eta \hat{m}_t}{\sqrt{\hat{v}_t}+\epsilon}$ | Combines momentum + RMSProp. Most popular optimizer. Default: $\beta_1=0.9$, $\beta_2=0.999$. |
+| 8 | **AdamW** (Adam with Weight Decay) | $g_t = \nabla_{\theta}\mathcal{L} + \lambda\theta_t$<br>Then apply Adam update with $g_t$ | Proper weight decay implementation. Better regularization than L2. |
+
+Loss Functions
+| Loss Function | Formula | Use Case | Characteristics |
+|:-------------:|:--------:|:--------:|:---------------|
+| **MSE** | $\displaystyle \mathcal{L}_{\text{MSE}} = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2$ | Regression | Penalizes large errors heavily (quadratic penalty). Sensitive to outliers. |
+| **Cross-Entropy** | $\displaystyle \mathcal{L}_{\text{CE}} = -\sum_{i} y_i \log(\hat{y}_i)$ | Multi-class Classification | Probabilistic outputs. Measures divergence between predicted and true distributions. |
+| **Binary Cross-Entropy** | $\displaystyle \mathcal{L}_{\text{BCE}} = -[y \log(\hat{y}) + (1 - y)\log(1 - \hat{y})]$ | Binary Classification | Works with sigmoid activation. Ideal for binary classification problems. |
+
+Activation Functions
+| Activation | Formula | Derivative | Range | Characteristics |
+|:----------:|:-------:|:----------:|:-----:|:---------------|
+| **ReLU** | $f(x) = \max(0, x)$ | $f'(x) = \begin{cases} 1 & x > 0 \\ 0 & x \leq 0 \end{cases}$ | $[0, \infty)$ | Most popular. Fast computation. Suffers from "dying ReLU" problem. |
+| **Tanh** | $f(x) = \frac{e^x - e^{-x}}{e^x + e^{-x}}$ | $f'(x) = 1 - f(x)^2$ | $(-1, 1)$ | Zero-centered output. Better for hidden layers than sigmoid. |
+| **Sigmoid** | $f(x) = \frac{1}{1 + e^{-x}}$ | $f'(x) = f(x)(1 - f(x))$ | $(0, 1)$ | Used for binary classification output. Prone to vanishing gradients. |
+
+Training Example
+```python
+# Target: w * x + b = 10.0, where x = 2.0
+# Expected: w ≈ 5.0, b ≈ 0.0
+
+x = Value(2.0)      # input
+w = Value(0.5)      # weight (initial)
+b = Value(0.0)      # bias (initial)
+
+optimizer = Adam([w, b], lr=0.1)
+
+for epoch in range(100):
+    logit = w * x + b           # forward
+    loss = (logit - 10) ** 2    # MSE
+    loss.backward()              # backward
+    optimizer.step()            # update
+```
+
+Parameter Reference
+| Parameter | Symbol | Default | Description |
+|-----------|--------|---------|-------------|
+| Learning Rate | $\eta$ | 0.01 - 0.1 | Step size for parameter update |
+| Beta 1 | $\beta_1$ | 0.9 | Decay rate for first moment (momentum) |
+| Beta 2 | $\beta_2$ | 0.999 | Decay rate for second moment (RMS) |
+| Momentum | $\beta$ | 0.9 | Velocity in SGD momentum |
+| Epsilon | $\epsilon$ | $10^{-8}$ | Numerical stability constant |
+| Weight Decay | $\lambda$ | 0.01 | L2 regularization strength |
+| Rho | $\rho$ | 0.95 | Decay rate for AdaDelta |
+
+## References
+- [Adam Paper](https://arxiv.org/abs/1412.6980)
+- [Optimization for Deep Learning](https://ruder.io/optimizing-gradient-descent/)
