@@ -1,6 +1,6 @@
 # NOTES
 
-## [Homework 1](https://github.com/ChristFarrell/_ml/blob/master/Homework/Homework%2001%20050326/Climb.py)
+## [Homework 1](https://github.com/ChristFarrell/_ml/blob/master/Homework/Homework%201%20050326/Climb.py)
 
 This homework was getting helped by AI for help understanding.<br>
 Link for AI : https://gemini.google.com/share/63b6aadd2bfbb <br>
@@ -41,7 +41,7 @@ After that, the engine started when program by starting with a random route, for
 - Check the distance, if the swapping results in a shorter distance.
 - Give up: If the program has tried swapping up to 500 times but no other route options are found.
 
-## [Homework 2](https://github.com/ChristFarrell/_ml/blob/master/Homework/Homework%2002%20120326/Manual%20Calculation%20of%20The%20Inverse%20Transit%20Algorithm.jpeg)
+## [Homework 2](https://github.com/ChristFarrell/_ml/blob/master/Homework/Homework%202%20120326/Manual%20Calculation%20of%20The%20Inverse%20Transit%20Algorithm.jpeg)
 
 Problem 1: $f(x, y, z) = (x \cdot y) + z$<br>
 In this computational graph, we first perform a Forward Pass where the inputs $x=1$ and $y=2$ are multiplied to produce an intermediate value of $2$, which is then added to $z=3$ to reach a final output of $5$.
@@ -65,7 +65,7 @@ In the Forward Pass, the product of $x(1)$ and $y(2)$ results in $2$, which is a
 | **x** | Input $x$ | $\frac{\partial f}{\partial P} \cdot y$ | **8** |
 | **y** | Input $y$ | $\frac{\partial f}{\partial P} \cdot x$ | **4** |
 
-## [Homework 3](https://github.com/ChristFarrell/_ml/tree/master/Homework/Homework%2003%20190326)
+## [Homework 3](https://github.com/ChristFarrell/_ml/tree/master/Homework/Homework%203%20190326)
 
 This homework was getting helped by Opencode AI for help understanding.<br>
 
@@ -156,6 +156,80 @@ Parameter Reference
 | Weight Decay | $\lambda$ | 0.01 | L2 regularization strength |
 | Rho | $\rho$ | 0.95 | Decay rate for AdaDelta |
 
-## References
+References
 - [Adam Paper](https://arxiv.org/abs/1412.6980)
 - [Optimization for Deep Learning](https://ruder.io/optimizing-gradient-descent/)
+
+
+## [Homework 4](https://github.com/ChristFarrell/_ml/tree/master/Homework/Homework%204%20260326)
+
+This homework was getting helped by Opencode AI for help understanding.<br>
+More explanation : https://github.com/ChristFarrell/_ml/blob/master/Homework/Homework%204%20260326/README.md
+
+Based on the concepts from Andrej Karpathy's [microgpt](https://gist.github.com/karpathy/8627fe009c40f57531cb18360106ce95).
+
+| Component | Description |
+|-----------|-------------|
+| **Value class** | Scalar autograd engine for backpropagation |
+| **Tokenizer** | Character-level: each letter gets an integer id |
+| **GPT architecture** | Token + position embeddings, multi-head attention, MLP, residuals, RMSNorm |
+| **Optimizer** | Adam with linear learning rate decay |
+| **Training** | Cross-entropy loss on next-token prediction |
+| **Inference** | Temperature-controlled sampling to generate new names |
+
+On the training, it would shown like this.
+```
+num docs: 32033
+vocab size: 27
+num params: 1296
+
+--- training for 500 steps ---
+
+step    1 / 500 | loss 3.3686
+...
+step  500 / 500 | loss 2.3908
+```
+
+After training, the model generates new names:
+```
+--- inference (temperature=0.5) ---
+
+  ienis
+  saleri
+  jala
+  talan
+  janaen
+  ...
+```
+
+```python
+n_embd = 8       # increase for more capacity (e.g. 16, 32)
+n_head = 2       # must divide n_embd evenly
+n_layer = 1      # increase for deeper model
+block_size = 12  # max sequence length
+num_steps = 200  # train longer for better results
+temperature = 0.5  # lower = conservative, higher = creative
+```
+
+| Config | Params | Steps | Quality |
+|--------|--------|-------|---------|
+| `n_embd=8, n_head=2, n_layer=1` | 1,296 | 200 | Basic |
+| `n_embd=16, n_head=4, n_layer=1` | 4,192 | 500 | Better |
+| `n_embd=16, n_head=4, n_layer=2` | ~8,000 | 1000 | Good |
+
+The concept of work for this project can be shown like this.
+```
+Input:  "emma"
+Tokens: [BOS, e, m, m, a, BOS]
+
+For each position, the model predicts the next token:
+
+  BOS → e
+  e   → m
+  m   → m
+  m   → a
+  a   → BOS
+
+Loss = average of -log(probability assigned to correct token)
+```
+The model learns statistical patterns in names (consonant-vowel structure, common beginnings/endings) and generates new plausible names by sampling from its learned distribution.
