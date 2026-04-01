@@ -105,25 +105,25 @@ where $\eta$ is the learning rate and $\nabla_{\theta} \mathcal{L}$ is the gradi
 | # | Optimizer | Update Formula | Characteristics |
 |:-:|:---------:|:--------------|:---------------|
 | 1 | **SGD** (Stochastic Gradient Descent) | $\theta_{t+1} = \theta_t - \eta \nabla_{\theta} \mathcal{L}$ | Simplest optimizer. Updates based on raw gradient. Can get stuck in local minima. |
-| 2 | **SGD + Momentum** | $v_t = \beta v_{t-1} + (1-\beta)\nabla_{\theta}\mathcal{L}$ | Adds velocity to escape local minima. $\beta$ typically = 0.9. |
-| 3 | **Nesterov Accelerated Gradient** | $v_t = \beta v_{t-1} + \nabla_{\theta}\mathcal{L}(\theta_t - \beta v_{t-1})$ | "Look-ahead" gradient. More accurate than standard momentum. |
+| 2 | **SGD + Momentum** | $v_t = \beta v_{t-1} + (1-\beta)\nabla_{\theta}\mathcal{L}$ | Adds velocity to escape local minima. $\beta$ typically = 0.9 |
+| 3 | **Nesterov Accelerated Gradient** | $v_t = \beta v_{t-1} + \nabla_{\theta}\mathcal{L}(\theta_t - \beta v_{t-1})$ | "Look-ahead" gradient. More accurate than standard momentum |
 | 4 | **RMSProp** | $E[g^2]_t = \beta E[g^2]_{t-1} + (1-\beta)g_t^2$<br>$\theta_{t+1} = \theta_t - \frac{\eta}{\sqrt{E[g^2]_t + \epsilon}} g_t$ | Adaptive learning rate per parameter. Good for non-stationary problems. |
 | 5 | **Adagrad** | $G_t = G_{t-1} + g_t \odot g_t$<br>$\theta_{t+1} = \theta_t - \frac{\eta}{\sqrt{G_t + \epsilon}} \odot g_t$ | Accumulates squared gradients. Automatically adjusts learning rate. |
 | 6 | **AdaDelta** | $E[g^2]_t = \rho E[g^2]_{t-1} + (1-\rho)g_t^2$<br>$\Delta\theta_t = -\frac{\sqrt{E[\Delta\theta^2]_{t-1}+\epsilon}}{\sqrt{E[g^2]_t+\epsilon}}g_t$ | No learning rate hyperparameter. Uses running average of gradient changes. |
-| 7 | **Adam** (Adaptive Moment Estimation) | $m_t = \beta_1 m_{t-1} + (1-\beta_1)g_t$<br>$v_t = \beta_2 v_{t-1} + (1-\beta_2)g_t^2$<br>$\hat{m}_t = \frac{m_t}{1-\beta_1^t}, \hat{v}_t = \frac{v_t}{1-\beta_2^t}$<br>$\theta_{t+1} = \theta_t - \frac{\eta \hat{m}_t}{\sqrt{\hat{v}_t}+\epsilon}$ | Combines momentum + RMSProp. Most popular optimizer. Default: $\beta_1=0.9$, $\beta_2=0.999$. |
+| 7 | **Adam** (Adaptive Moment Estimation) | $m_t = \beta_1 m_{t-1} + (1-\beta_1)g_t$<br>$v_t = \beta_2 v_{t-1} + (1-\beta_2)g_t^2$<br>$\hat{m}_t = \frac{m_t}{1-\beta_1^t}, \hat{v}_t = \frac{v_t}{1-\beta_2^t}$<br>$\theta_{t+1} = \theta_t - \frac{\eta \hat{m}_t}{\sqrt{\hat{v}_t}+\epsilon}$ | Combines momentum + RMSProp. Most popular optimizer. Default: $\beta_1=0.9, \beta_2=0.999$ |
 | 8 | **AdamW** (Adam with Weight Decay) | $g_t = \nabla_{\theta}\mathcal{L} + \lambda\theta_t$<br>Then apply Adam update with $g_t$ | Proper weight decay implementation. Better regularization than L2. |
 
 Loss Functions
 | Loss Function | Formula | Use Case | Characteristics |
 |:-------------:|:--------:|:--------:|:---------------|
-| **MSE** | $\displaystyle \mathcal{L}_{\text{MSE}} = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2$ | Regression | Penalizes large errors heavily (quadratic penalty). Sensitive to outliers. |
-| **Cross-Entropy** | $\displaystyle \mathcal{L}_{\text{CE}} = -\sum_{i} y_i \log(\hat{y}_i)$ | Multi-class Classification | Probabilistic outputs. Measures divergence between predicted and true distributions. |
-| **Binary Cross-Entropy** | $\displaystyle \mathcal{L}_{\text{BCE}} = -[y \log(\hat{y}) + (1 - y)\log(1 - \hat{y})]$ | Binary Classification | Works with sigmoid activation. Ideal for binary classification problems. |
+| **MSE** | $\mathcal{L}_{\text{MSE}} = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2$ | Regression | Penalizes large errors heavily (quadratic penalty). Sensitive to outliers. |
+| **Cross-Entropy** | $\mathcal{L}_{\text{CE}} = -\sum_{i} y_i \log(\hat{y}_i)$ | Multi-class Classification | Probabilistic outputs. Measures divergence between predicted and true distributions. |
+| **Binary Cross-Entropy** | $\mathcal{L}_{\text{BCE}} = -[y \log(\hat{y}) + (1 - y)\log(1 - \hat{y})]$ | Binary Classification | Works with sigmoid activation. Ideal for binary classification problems. |
 
 Activation Functions
 | Activation | Formula | Derivative | Range | Characteristics |
 |:----------:|:-------:|:----------:|:-----:|:---------------|
-| **ReLU** | $f(x) = \max(0, x)$ | $f'(x) = \begin{cases} 1 & x > 0 \\ 0 & x \leq 0 \end{cases}$ | $[0, \infty)$ | Most popular. Fast computation. Suffers from "dying ReLU" problem. |
+| **ReLU** | $f(x) = \max(0, x)$ | $f'(x) = \begin{cases} 1 & x > 0 \\ 0 & x \le 0 \end{cases}$ | $[0, \infty)$ | Most popular. Fast computation. Suffers from "dying ReLU" problem. |
 | **Tanh** | $f(x) = \frac{e^x - e^{-x}}{e^x + e^{-x}}$ | $f'(x) = 1 - f(x)^2$ | $(-1, 1)$ | Zero-centered output. Better for hidden layers than sigmoid. |
 | **Sigmoid** | $f(x) = \frac{1}{1 + e^{-x}}$ | $f'(x) = f(x)(1 - f(x))$ | $(0, 1)$ | Used for binary classification output. Prone to vanishing gradients. |
 
