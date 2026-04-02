@@ -1,0 +1,38 @@
+<h2>文章管理</h2>
+
+<p style="margin: 20px 0;">
+  <a href="/admin/new" class="btn">發布新文章</a>
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>標題</th>
+      <th>Slug</th>
+      <th>狀態</th>
+      <th>日期</th>
+      <th>操作</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each posts}}
+      <tr>
+        <td>{{title}}</td>
+        <td>/post/{{slug}}</td>
+        <td>{{#if published}}已發布{{else}}草稿{{/if}}</td>
+        <td>{{formatDate createdAt}}</td>
+        <td>
+          <a href="/post/{{slug}}" class="btn btn-secondary" target="_blank">檢視</a>
+          <a href="/admin/edit/{{id}}" class="btn">編輯</a>
+          <form method="POST" action="/admin/delete/{{id}}" style="display: inline;">
+            <button type="submit" class="btn btn-danger" onclick="return confirm('確定要刪除這篇文章嗎？');">刪除</button>
+          </form>
+        </td>
+      </tr>
+    {{/each}}
+  </tbody>
+</table>
+
+{{#unless posts}}
+  <p style="margin-top: 20px;">尚無文章，點擊「發布新文章」開始創作！</p>
+{{/unless}}

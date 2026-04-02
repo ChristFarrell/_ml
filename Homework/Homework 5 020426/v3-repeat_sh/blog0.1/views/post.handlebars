@@ -1,0 +1,11 @@
+<article>
+  <h1>{{post.title}}</h1>
+  <p class="meta">發布日期: {{formatDate post.createdAt}} | 狀態: {{#if post.published}}已發布{{else}}草稿{{/if}}</p>
+  <hr>
+  <div class="content">
+    {{{marked post.content}}}
+  </div>
+  <p style="margin-top: 20px;">
+    <a href="/" class="btn btn-secondary">返回首頁</a>
+  </p>
+</article>

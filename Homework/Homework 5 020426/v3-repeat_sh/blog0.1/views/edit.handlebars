@@ -1,0 +1,28 @@
+<h2>{{#if isNew}}發布新文章{{else}}編輯文章{{/if}}</h2>
+
+<form method="POST" action="{{action}}">
+  <div>
+    <label for="title">標題</label>
+    <input type="text" id="title" name="title" value="{{post.title}}" required>
+  </div>
+  
+  <div>
+    <label for="slug">Slug (網址)</label>
+    <input type="text" id="slug" name="slug" value="{{post.slug}}" required>
+  </div>
+  
+  <div>
+    <label for="content">內容 (支援 Markdown)</label>
+    <textarea id="content" name="content" required>{{post.content}}</textarea>
+  </div>
+  
+  <div class="checkbox">
+    <input type="checkbox" id="published" name="published" {{#if post.published}}checked{{/if}}>
+    <label for="published" style="margin-bottom: 0;">發布文章</label>
+  </div>
+  
+  <div style="margin-top: 20px;">
+    <button type="submit" class="btn">{{#if isNew}}發布{{else}}更新{{/if}}</button>
+    <a href="/admin" class="btn btn-secondary">取消</a>
+  </div>
+</form>

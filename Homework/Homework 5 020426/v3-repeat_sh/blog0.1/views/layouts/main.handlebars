@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{#if title}}{{title}} - {{/if}}我的網誌</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }
+    header { border-bottom: 1px solid #eee; padding-bottom: 20px; margin-bottom: 30px; }
+    h1 { color: #2c3e50; }
+    nav a { margin-right: 15px; color: #3498db; text-decoration: none; }
+    nav a:hover { text-decoration: underline; }
+    .post { margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #eee; }
+    .post h2 a { color: #2c3e50; text-decoration: none; }
+    .post h2 a:hover { color: #3498db; }
+    .meta { color: #7f8c8d; font-size: 0.9em; }
+    .content { margin-top: 15px; }
+    .btn { display: inline-block; padding: 8px 16px; background: #3498db; color: white; text-decoration: none; border-radius: 4px; border: none; cursor: pointer; }
+    .btn:hover { background: #2980b9; }
+    .btn-danger { background: #e74c3c; }
+    .btn-danger:hover { background: #c0392b; }
+    .btn-secondary { background: #95a5a6; }
+    .btn-secondary:hover { background: #7f8c8d; }
+    form { margin-top: 20px; }
+    label { display: block; margin-bottom: 5px; font-weight: bold; }
+    input[type="text"], textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; }
+    textarea { min-height: 300px; }
+    .checkbox { display: flex; align-items: center; }
+    .checkbox input { width: auto; margin-right: 10px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 10px; text-align: left; border-bottom: 1px solid #eee; }
+    th { background: #f8f9fa; }
+    footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; color: #7f8c8d; }
+    .error { background: #fde8e8; border: 1px solid #f56565; padding: 20px; border-radius: 4px; color: #c53030; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1><a href="/" style="color: inherit; text-decoration: none;">我的網誌</a></h1>
+    <nav>
+      <a href="/">首頁</a>
+      <a href="/admin">管理</a>
+    </nav>
+  </header>
+  
+  <main>
+    {{{body}}}
+  </main>
+  
+  <footer>
+    <p>&copy; 2024 我的網誌</p>
+  </footer>
+</body>
+</html>
