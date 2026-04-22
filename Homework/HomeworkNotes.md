@@ -164,9 +164,8 @@ References
 ## [Homework 4](https://github.com/ChristFarrell/_ml/tree/master/Homework/Homework%204%20260326)
 
 This homework was getting helped by Opencode AI for help understanding.<br>
-More explanation : https://github.com/ChristFarrell/_ml/blob/master/Homework/Homework%204%20260326/README.md
-
-Based on the concepts from Andrej Karpathy's [microgpt](https://gist.github.com/karpathy/8627fe009c40f57531cb18360106ce95).
+More explanation : https://github.com/ChristFarrell/_ml/blob/master/Homework/Homework%204%20260326/README.md<Br>
+Based on the concepts from Andrej Karpathy's [microgpt](https://gist.github.com/karpathy/8627fe009c40f57531cb18360106ce95).<br>
 
 | Component | Description |
 |-----------|-------------|
@@ -233,3 +232,35 @@ For each position, the model predicts the next token:
 Loss = average of -log(probability assigned to correct token)
 ```
 The model learns statistical patterns in names (consonant-vowel structure, common beginnings/endings) and generates new plausible names by sampling from its learned distribution.
+
+## [Homework 5](https://github.com/ChristFarrell/_ml/tree/master/Homework/Homework%205%20020426/v2-agent-xml)
+
+This homework was getting helped by Opencode AI for help understanding.<br>
+
+On this homework, we asked to modify the agent0.py to update security controls: It asked
+1. Files outside the program's folder cannot be directly accessed (internal files are allowed).
+2. If an agent0.py attempts to access an external file, it must first block the access and request permission before allowing access.
+
+The update python shown in the feature:
+- SCRIPT_DIR & APPROVED_PATHS	    [17-18]
+- is_path_within_allowed()	        [91-114]
+- check_and_approve()	            [116-138]
+- Security check in main loop	    [201-205]
+- Print security scope on startup	[160]
+
+The project flow was progress as below:
+1. Startup
+    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) captures the program's folder path as the security boundary.
+
+2. Command interception
+    Before subprocess.run() executes, check_and_approve(cmd) is called.
+
+3. Path validation
+    check_and_approve() calls is_path_within_allowed(cmd) to extract file paths from the shell command and compare them against SCRIPT_DIR.
+
+4. Decision flow:
+    - If all paths are within SCRIPT_DIR → return True → command executes
+    - If external paths found → print warning → ask user: yes/no/always
+        - yes → return True → command executes
+        - no → return False → command blocked
+        - always → store path in APPROVED_PATHS → future commands to same path auto-approved
