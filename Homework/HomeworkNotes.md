@@ -264,3 +264,106 @@ The project flow was progress as below:
         - yes → return True → command executes
         - no → return False → command blocked
         - always → store path in APPROVED_PATHS → future commands to same path auto-approved
+
+## [Homework 6](https://github.com/ChristFarrell/_ml/tree/master/Homework/Homework%206%20230426)
+
+This homework was getting helped by Claude for help understanding.<br>
+Link for Claude: https://claude.ai/share/61787149-4a89-457e-bae6-3e971058ba15<br>
+
+On this code, we asked to made the mini-gpt without using the transformer. It means, we made the chat-bot with manual way without using any implementation chat AI. The chat work by 2 category, rule-based or generated. This is showing of flow chart of machine
+```
+You type something
+        ↓
+Does it match a rule? ("hello", "who are you", "what is ai", etc.)
+        ↓
+    YES → return the hand-written answer immediately
+          (no temperature, no top-k, no model involved at all)
+        ↓
+    NO  → pass your input to the language model
+              ↓
+          Take last 2 words of your input
+              ↓
+          LogReg outputs probability for every word
+              ↓
+          Apply top-k  → cut out low-probability words
+              ↓
+          Apply temperature → reshape the distribution
+              ↓
+          Sample a word → append it → repeat
+```
+
+1. Rule Based<br>
+    On rule based, we already put some dictionary inside of our chat-bot, so if the user's word have match with the bot dictionary, bot can taking the dictionary word to be printed out. for example
+    ```
+    "hello":              ["Hello! How can I help you today?", "Hi there! Nice to meet you!"],
+    "hi":                 ["Hi! How are you?", "Hello!"],
+    "what is ai":         ["AI stands for Artificial Intelligence — machines that simulate human thinking
+                            ", "AI is the field of making computers learn, reason, and adapt."],
+    "what is python":     ["Python is a popular programming language great for data science and AI.",
+                            "Python is known for its clear syntax and rich ML ecosystem."],
+    ```
+
+    Here is the example output of using the dictionary chat-bot:
+    ```
+    You: hi
+    Mini GPT: Hello!
+         [mode: rule-based]  [temp: —  top-k: —]  [UNK: hi]
+
+    You: how are you
+    Mini GPT: Great! How can I help?
+         [mode: rule-based]  [temp: —  top-k: —]  [UNK: you]
+
+    You: what is ai
+    Mini GPT: AI is the field of making computers learn, reason, and adapt.
+         [mode: rule-based]  [temp: —  top-k: —]  [UNK: what, ai]
+
+    You: what is ml
+    Mini GPT: Machine Learning is a branch of AI where systems improve from experience.
+         [mode: rule-based]  [temp: —  top-k: —]  [UNK: what, ml]
+    ```
+
+2. Generated<br>
+    For the word that was out of context or not included in dictionary, the training can be using so bot can predict the answer of chat. The tokens that we use was <EOS> (end of sentence) and <UNK> (unknown word). For example, from the sentence "machine learning allows computers to learn":
+    | Context (input) | Next word (target) |
+    | :--- | :--- |
+    | `<EOS> <EOS>` | machine |
+    | `<EOS> machine` | learning |
+    | `machine learning` | allows |
+    | `learning allows` | computers |
+    | `allows computers` | to |
+    | `computers to` | learn |
+    | `to learn` | `<EOS>` |
+
+    Since machine work by mathemathic, it translates the word to context of number. If the machine have detect word that was match and already saved to their memory, machine will give One-Hot Vector or x matrix. As long the context from x matrix, the y vector was a target word. The machine detects it by see the context. For example:
+    ```
+    <EOS>, machine, learning, allows
+    Machine translate: 0 1 0 0
+    
+    Context (Input X): <EOS> machine
+    Next Word (Target): learning
+    y value: Because learning in Index 2, so y value = 2
+    ```
+
+    The context of this x and y, is that:
+    - The AI ​​looks at Input X (the numbers 0 and 1).
+    - The AI ​​tries to guess. For example, it guesses 3 (allows).
+    - The system checks Target y. It turns out the correct answer is 2 (learning).
+    - Because the guess was wrong (3 ≠ 2), the AI ​​will improve (update its weights) so that the next time its guess is closer to 2.
+
+    On process generating:
+    - Takes the last 2 words of your input as context
+    - Asks LogReg: "what's the probability of every word in the vocabulary coming next?"
+    - Samples from that distribution
+    - Appends that word to the sentence, then uses the new last 2 words as the next context
+    - Repeats until it hits <EOS> or reaches the word limit
+
+    At the end, here is the example output of using the generated chat-bot
+    ```
+    You: machine learning allows computers to learn
+    Mini GPT: to learn communicate
+         [mode: generated]  [temp: 0.9  top-k: 10]  [all words known]
+
+    You: banana is fruit
+    Mini GPT: is fruit offers
+         [mode: generated]  [temp: 0.9  top-k: 10]  [UNK: banana, fruit]
+    ```
