@@ -1,0 +1,11 @@
+# requirements.txt — Email Sentinel V1
+#
+# Semua dependency V1 adalah stdlib Python kecuali satu:
+# - requests: opsional, dipakai di V2 untuk WHOIS/DNS calls
+#
+# V1 hanya butuh:
+#   - Python 3.11+  (untuk type hints modern)
+#   - Ollama berjalan lokal
+#
+# Untuk development/testing:
+pytest>=7.0

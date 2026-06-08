@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Email Sentinel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy: #0d1b6e;
+      --navy-dark: #080f3f;
+      --navy-light: #1a237e;
+      --blue-accent: #3949ab;
+      --blue-bright: #42a5f5;
+      --blue-glow: rgba(66,165,245,0.18);
+      --white: #ffffff;
+      --gray-100: #f5f6fa;
+      --gray-200: #e8eaf6;
+      --gray-400: #90a4ae;
+      --gray-600: #546e7a;
+      --text: #1a1a2e;
+      --text-dim: #607d8b;
+      --border: rgba(13,27,110,0.12);
+      --low: #2e7d32; --low-bg: #e8f5e9; --low-border: #a5d6a7;
+      --medium: #e65100; --medium-bg: #fff3e0; --medium-border: #ffcc80;
+      --high: #c62828; --high-bg: #ffebee; --high-border: #ef9a9a;
+      --critical: #7b0000; --critical-bg: #ffcdd2; --critical-border: #ef5350;
+      --shadow: 0 4px 24px rgba(13,27,110,0.10);
+      --shadow-lg: 0 12px 48px rgba(13,27,110,0.16);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Space Grotesk', system-ui, sans-serif;
+      background: var(--gray-100);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── BACKGROUND GRID ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(13,27,110,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(13,27,110,0.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      position: relative;
+      background: linear-gradient(135deg, var(--navy-dark) 0%, var(--navy) 60%, var(--blue-accent) 100%);
+      padding: 28px 0 24px;
+      z-index: 10;
+      overflow: hidden;
+    }
+    .header::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--blue-bright), transparent);
+    }
+    .header-inner {
+      max-width: 1800px;
+      margin: 0 auto;
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .header-icon {
+      font-size: 36px;
+      filter: drop-shadow(0 0 12px rgba(66,165,245,0.5));
+    }
+    .header-text h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--white);
+      letter-spacing: -0.3px;
+    }
+    .header-text p {
+      font-size: 13px;
+      color: rgba(255,255,255,0.6);
+      margin-top: 2px;
+    }
+    .header-badge {
+      margin-left: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--blue-bright);
+      background: rgba(66,165,245,0.12);
+      border: 1px solid rgba(66,165,245,0.25);
+      padding: 4px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── MAIN LAYOUT ── */
+    .main {
+      position: relative;
+      max-width: 1800px;
+      margin: 0 auto;
+      padding: 36px 32px 60px;
+      z-index: 1;
+    }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--white);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    .card-header {
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .card-header-icon { font-size: 18px; }
+    .card-header h2 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+    .card-body { padding: 24px; }
+
+    /* ── VERSION TOGGLE ── */
+    .version-toggle {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .version-btn {
+      position: relative;
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 2px solid var(--gray-200);
+      background: var(--gray-100);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: left;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .version-btn:hover {
+      border-color: var(--blue-accent);
+      background: var(--gray-200);
+    }
+    .version-btn.active {
+      border-color: var(--navy);
+      background: var(--navy);
+      color: white;
+    }
+    .version-btn .vb-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+      display: block;
+    }
+    .version-btn:not(.active) .vb-tag { color: var(--navy); }
+    .version-btn.active .vb-tag { color: var(--blue-bright); }
+    .version-btn .vb-title {
+      font-size: 13px;
+      font-weight: 600;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .version-btn .vb-desc {
+      font-size: 12px;
+      line-height: 1.4;
+    }
+    .version-btn:not(.active) .vb-desc { color: var(--text-dim); }
+    .version-btn.active .vb-desc { color: rgba(255,255,255,0.7); }
+    .version-btn .vb-check {
+      position: absolute;
+      top: 12px; right: 12px;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: var(--blue-bright);
+      color: var(--navy-dark);
+      font-size: 11px;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .version-btn.active .vb-check { opacity: 1; }
+
+    /* ── INPUT AREA ── */
+    .input-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--navy);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .input-label span { font-size: 12px; color: var(--text-dim); font-weight: 400; }
+    textarea {
+      width: 100%;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--text);
+      background: var(--gray-100);
+      border: 2px solid var(--gray-200);
+      border-radius: 10px;
+      padding: 14px 16px;
+      resize: vertical;
+      min-height: 100px;
+      transition: border-color 0.2s;
+      line-height: 1.5;
+    }
+    textarea:focus {
+      outline: none;
+      border-color: var(--navy);
+      background: white;
+    }
+    textarea::placeholder { color: var(--gray-400); }
+
+    /* ── ANALYZE BUTTON ── */
+    .btn-analyze {
+      width: 100%;
+      margin-top: 14px;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--navy) 0%, var(--blue-accent) 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.3px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-analyze:hover { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(13,27,110,0.25); }
+    .btn-analyze:active { transform: translateY(0); }
+    .btn-analyze:disabled { opacity: 0.6; cursor: not-allowed; transform: none; filter: none; box-shadow: none; }
+    .btn-analyze.loading { background: linear-gradient(135deg, #1565c0 0%, #1976d2 100%); }
+
+    /* Spinner */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    /* ── RESULT CARD ── */
+    #result { display: none; }
+    #result.visible { display: block; }
+
+    /* Risk Badge */
+    .risk-banner {
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .risk-banner.LOW     { background: var(--low-bg); border-left: 5px solid var(--low); }
+    .risk-banner.MEDIUM  { background: var(--medium-bg); border-left: 5px solid var(--medium); }
+    .risk-banner.HIGH    { background: var(--high-bg); border-left: 5px solid var(--high); }
+    .risk-banner.CRITICAL{ background: var(--critical-bg); border-left: 5px solid var(--critical); }
+
+    .risk-emoji { font-size: 36px; flex-shrink: 0; }
+    .risk-info { flex: 1; }
+    .risk-level-label {
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .risk-banner.LOW     .risk-level-label { color: var(--low); }
+    .risk-banner.MEDIUM  .risk-level-label { color: var(--medium); }
+    .risk-banner.HIGH    .risk-level-label { color: var(--high); }
+    .risk-banner.CRITICAL .risk-level-label { color: var(--critical); }
+    .risk-subtitle { font-size: 13px; color: var(--text-dim); margin-top: 4px; }
+
+    /* Score ring */
+    .score-ring-wrap { flex-shrink: 0; }
+    .score-ring {
+      width: 68px; height: 68px;
+      border-radius: 50%;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .score-ring.LOW     { background: var(--low-bg); border: 3px solid var(--low); }
+    .score-ring.MEDIUM  { background: var(--medium-bg); border: 3px solid var(--medium); }
+    .score-ring.HIGH    { background: var(--high-bg); border: 3px solid var(--high); }
+    .score-ring.CRITICAL{ background: var(--critical-bg); border: 3px solid var(--critical); }
+    .score-num {
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .score-ring.LOW     .score-num { color: var(--low); }
+    .score-ring.MEDIUM  .score-num { color: var(--medium); }
+    .score-ring.HIGH    .score-num { color: var(--high); }
+    .score-ring.CRITICAL .score-num { color: var(--critical); }
+    .score-label { font-size: 9px; color: var(--text-dim); letter-spacing: 0.5px; margin-top: 2px; }
+
+    /* Result sections */
+    .result-body { padding: 20px 24px; }
+
+    .result-section { margin-bottom: 20px; }
+    .result-section:last-child { margin-bottom: 0; }
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--gray-200);
+    }
+
+    /* Email meta grid */
+    .meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .meta-item {
+      background: var(--gray-100);
+      border-radius: 8px;
+      padding: 10px 14px;
+    }
+    .meta-key {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-bottom: 3px;
+      font-weight: 500;
+    }
+    .meta-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      word-break: break-all;
+    }
+    .meta-val.na { color: var(--gray-400); font-weight: 400; }
+
+    /* Signal notes */
+    .signal-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+    .signal-item {
+      display: flex; align-items: flex-start; gap: 8px;
+      padding: 10px 14px;
+      background: var(--gray-100);
+      border-radius: 8px;
+      border-left: 3px solid var(--medium-border);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+    .signal-item.safe {
+      border-left-color: var(--low-border);
+    }
+    .signal-icon { flex-shrink: 0; font-size: 14px; }
+    .no-signals {
+      font-size: 13px;
+      color: var(--text-dim);
+      font-style: italic;
+      padding: 10px 14px;
+      background: var(--low-bg);
+      border-radius: 8px;
+    }
+
+    /* Network intel grid */
+    .net-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .net-item {
+      padding: 10px 14px;
+      border-radius: 8px;
+      background: var(--gray-100);
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 12px;
+    }
+    .net-key { color: var(--text-dim); }
+    .net-val { font-weight: 600; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+    .net-val.ok { color: var(--low); }
+    .net-val.warn { color: var(--high); }
+    .net-val.neutral { color: var(--text); }
+
+    .net-notes { display: flex; flex-direction: column; gap: 5px; }
+    .net-note {
+      padding: 7px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+    .net-note.ok { background: var(--low-bg); color: var(--low); }
+    .net-note.warn { background: var(--high-bg); color: var(--high); }
+
+    /* AI analysis */
+    .ai-box {
+      background: linear-gradient(135deg, #e8eaf6 0%, #e3f2fd 100%);
+      border: 1px solid #c5cae9;
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--text);
+      font-style: italic;
+      white-space: pre-wrap;
+    }
+    .ai-box.offline {
+      background: var(--gray-100);
+      border-color: var(--gray-200);
+      color: var(--text-dim);
+      font-style: normal;
+    }
+
+    /* Recommendation */
+    .reco-box {
+      padding: 14px 16px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.5;
+    }
+    .reco-box.LOW     { background: var(--low-bg); color: var(--low); border: 1px solid var(--low-border); }
+    .reco-box.MEDIUM  { background: var(--medium-bg); color: var(--medium); border: 1px solid var(--medium-border); }
+    .reco-box.HIGH    { background: var(--high-bg); color: var(--high); border: 1px solid var(--high-border); }
+    .reco-box.CRITICAL{ background: var(--critical-bg); color: var(--critical); border: 1px solid var(--critical-border); }
+
+    /* Footer meta */
+    .result-footer {
+      padding: 12px 24px;
+      background: var(--gray-100);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .result-footer-left {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+    .version-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: var(--navy);
+      color: var(--blue-bright);
+    }
+
+    /* Error */
+    .error-box {
+      background: var(--high-bg);
+      border: 1px solid var(--high-border);
+      border-radius: 10px;
+      padding: 16px 20px;
+      color: var(--high);
+      font-size: 13px;
+    }
+
+    /* ── LOADING OVERLAY ── */
+    .loading-state {
+      padding: 40px 24px;
+      text-align: center;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+    .loading-dots {
+      display: flex; justify-content: center; gap: 8px;
+      margin-bottom: 16px;
+    }
+    .ldot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--blue-accent);
+      animation: pulse 0.8s infinite;
+    }
+    .ldot:nth-child(2) { animation-delay: 0.2s; }
+    .ldot:nth-child(3) { animation-delay: 0.4s; }
+    .loading-text { font-size: 14px; color: var(--text-dim); }
+
+    /* ── HOW IT WORKS ── */
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .info-item {
+      padding: 14px 16px;
+      border-radius: 10px;
+      background: var(--gray-100);
+      border: 1px solid var(--border);
+    }
+    .info-item-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .info-item-desc {
+      font-size: 12px;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+
+    @media (max-width: 600px) {
+      .meta-grid, .net-grid, .info-grid { grid-template-columns: 1fr; }
+      .version-toggle { grid-template-columns: 1fr; }
+      .header-badge { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="header-icon">📧</div>
+    <div class="header-text">
+      <h1>Email Sentinel</h1>
+      <p>Phishing & Email Threat Analyzer</p>
+    </div>
+    <div class="header-badge">LOCAL AI</div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- ANALYZER CARD -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-header-icon">🔍</span>
+      <h2>Analyze Email</h2>
+    </div>
+    <div class="card-body">
+
+      <!-- VERSION SELECTOR -->
+      <div class="version-toggle">
+        <button class="version-btn active" data-version="v1" onclick="selectVersion('v1')">
+          <span class="vb-check">✓</span>
+          <span class="vb-tag">V1</span>
+          <span class="vb-title">Local + AI Analysis</span>
+          <span class="vb-desc">Signal extraction from headers &amp; Ollama AI scoring. Fast, no network calls.</span>
+        </button>
+        <button class="version-btn" data-version="v2" onclick="selectVersion('v2')">
+          <span class="vb-check">✓</span>
+          <span class="vb-tag">V2</span>
+          <span class="vb-title">+ Network Investigation</span>
+          <span class="vb-desc">Adds WHOIS, MX, SPF, DMARC checks. More thorough, takes longer.</span>
+        </button>
+      </div>
+
+      <!-- EMAIL INPUT -->
+      <div class="input-label">
+        Email or Raw Headers
+        <span>— paste email address, "Name &lt;email@domain.com&gt;", or full raw headers</span>
+      </div>
+      <textarea id="emailInput" placeholder="e.g. support@paypa1-secure.com&#10;&#10;Or paste raw email headers:&#10;From: Fake Bank <noreply@bancorp-secure.xyz>&#10;Subject: URGENT: Verify your account&#10;Reply-To: collect@temp-mail.com&#10;Received: from [203.0.113.42] ..."></textarea>
+
+      <button class="btn-analyze" id="analyzeBtn" onclick="runAnalysis()">
+        <span id="btnIcon">🛡️</span>
+        <span id="btnText">Analyze Email</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- RESULT CARD -->
+  <div class="card" id="result">
+    <div id="resultContent"></div>
+  </div>
+
+  <!-- INFO CARD -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-header-icon">ℹ️</span>
+      <h2>How It Works</h2>
+    </div>
+    <div class="card-body">
+      <div class="info-grid">
+        <div class="info-item">
+          <div class="info-item-title">🧠 V1 — Local Signals</div>
+          <div class="info-item-desc">Detects homoglyphs, digit substitution, brand impersonation, suspicious TLDs, Reply-To mismatch, and phishing subject keywords.</div>
+        </div>
+        <div class="info-item">
+          <div class="info-item-title">🤖 AI Scoring</div>
+          <div class="info-item-desc">Signals are sent to a local Ollama model (llama3.2) which provides a natural language analysis and a risk score.</div>
+        </div>
+        <div class="info-item">
+          <div class="info-item-title">🌐 V2 — Network Intel</div>
+          <div class="info-item-desc">Adds real-time checks: WHOIS domain age, MX record presence, SPF and DMARC record validation.</div>
+        </div>
+        <div class="info-item">
+          <div class="info-item-title">🔒 Privacy-First</div>
+          <div class="info-item-desc">All AI analysis runs locally via Ollama. No email data is sent to external cloud services.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let currentVersion = 'v1';
+
+  function selectVersion(v) {
+    currentVersion = v;
+    document.querySelectorAll('.version-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.version === v);
+    });
+  }
+
+  function setLoading(loading) {
+    const btn = document.getElementById('analyzeBtn');
+    const icon = document.getElementById('btnIcon');
+    const text = document.getElementById('btnText');
+    btn.disabled = loading;
+    if (loading) {
+      btn.classList.add('loading');
+      icon.textContent = '';
+      icon.innerHTML = '<div class="spinner"></div>';
+      text.textContent = currentVersion === 'v2' ? 'Investigating domain...' : 'Analyzing...';
+    } else {
+      btn.classList.remove('loading');
+      icon.textContent = '🛡️';
+      text.textContent = 'Analyze Email';
+    }
+  }
+
+  function riskEmoji(level) {
+    return { LOW: '🟢', MEDIUM: '🟡', HIGH: '🔴', CRITICAL: '⛔', UNKNOWN: '⚪' }[level] || '⚪';
+  }
+
+  function isOfflineAI(text) {
+    return text && (text.startsWith('[Ollama') || text.startsWith('[Error') || text.startsWith('[AI'));
+  }
+
+  function renderMeta(r) {
+    const items = [
+      { k: 'Email Address', v: r.email },
+      { k: 'Domain', v: r.domain },
+      { k: 'Display Name', v: r.from_name },
+      { k: 'Reply-To', v: r.reply_to },
+      { k: 'Originating IP', v: r.originating_ip },
+      { k: 'Hop Count', v: r.hop_count > 0 ? r.hop_count : null },
+    ];
+    return `<div class="meta-grid">` + items.map(it => `
+      <div class="meta-item">
+        <div class="meta-key">${it.k}</div>
+        <div class="meta-val ${!it.v ? 'na' : ''}">${it.v || '—'}</div>
+      </div>
+    `).join('') + `</div>`;
+  }
+
+  function renderSignals(notes) {
+    if (!notes || notes.length === 0) {
+      return `<div class="no-signals">✅ No suspicious signals detected locally.</div>`;
+    }
+    return `<ul class="signal-list">` + notes.map(n => {
+      const isSafe = n.toLowerCase().includes('free email') || n.toLowerCase().includes('gratis');
+      return `<li class="signal-item ${isSafe ? 'safe' : ''}">
+        <span class="signal-icon">${isSafe ? 'ℹ️' : '⚠️'}</span>
+        <span>${n}</span>
+      </li>`;
+    }).join('') + `</ul>`;
+  }
+
+  function renderNetIntel(intel) {
+    if (!intel) return `<p style="color:var(--text-dim);font-size:13px;font-style:italic;">Network intel not available in V1 mode.</p>`;
+
+    const ageStr = intel.domain_age_days != null
+      ? `${intel.domain_age_days} days${intel.is_young_domain ? ' ⚠' : ''}`
+      : 'Unknown';
+
+    const netItems = [
+      { k: 'Registrar', v: intel.registrar || 'Unknown', cls: 'neutral' },
+      { k: 'Domain Age', v: ageStr, cls: intel.is_young_domain ? 'warn' : 'ok' },
+      { k: 'MX Record', v: intel.has_mx_records ? '✓ Present' : '✗ Missing', cls: intel.has_mx_records ? 'ok' : 'warn' },
+      { k: 'SPF', v: intel.spf_valid ? '✓ Valid' : '✗ Missing/Invalid', cls: intel.spf_valid ? 'ok' : 'warn' },
+      { k: 'DMARC', v: intel.dmarc_valid ? `✓ Valid (${intel.dmarc_policy || '?'})` : '✗ Missing/Invalid', cls: intel.dmarc_valid ? 'ok' : 'warn' },
+      { k: 'Network Score', v: `+${intel.net_score}/60`, cls: intel.net_score > 20 ? 'warn' : 'ok' },
+    ];
+
+    let html = `<div class="net-grid">` + netItems.map(it => `
+      <div class="net-item">
+        <span class="net-key">${it.k}</span>
+        <span class="net-val ${it.cls}">${it.v}</span>
+      </div>
+    `).join('') + `</div>`;
+
+    if (intel.net_notes && intel.net_notes.length > 0) {
+      html += `<div class="net-notes">` + intel.net_notes.map(n => {
+        const isOk = n.includes('✓') || n.toLowerCase().includes('valid') || n.toLowerCase().includes('present');
+        return `<div class="net-note ${isOk ? 'ok' : 'warn'}">${n}</div>`;
+      }).join('') + `</div>`;
+    }
+
+    if (intel.errors && intel.errors.length > 0) {
+      html += `<div style="margin-top:8px;font-size:11px;color:var(--text-dim);">` +
+        intel.errors.map(e => `<div>ℹ ${e}</div>`).join('') + `</div>`;
+    }
+
+    return html;
+  }
+
+  function renderResult(r) {
+    const level = r.risk_level;
+    const emoji = riskEmoji(level);
+    const aiOffline = isOfflineAI(r.ai_analysis);
+
+    return `
+      <div class="risk-banner ${level}">
+        <div class="risk-emoji">${emoji}</div>
+        <div class="risk-info">
+          <div class="risk-level-label">${level} RISK</div>
+          <div class="risk-subtitle">${r.email || r.domain || 'Email analyzed'}</div>
+        </div>
+        <div class="score-ring-wrap">
+          <div class="score-ring ${level}">
+            <div class="score-num">${r.risk_score}</div>
+            <div class="score-label">/100</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="result-body">
+
+        <div class="result-section">
+          <div class="section-title">📋 Email Details</div>
+          ${renderMeta(r)}
+        </div>
+
+        <div class="result-section">
+          <div class="section-title">🚩 Local Signals (${r.signal_notes ? r.signal_notes.length : 0} detected)</div>
+          ${renderSignals(r.signal_notes)}
+        </div>
+
+        ${r.version === 'v2' ? `
+        <div class="result-section">
+          <div class="section-title">🌐 Network Investigation</div>
+          ${renderNetIntel(r.intel)}
+        </div>
+        ` : ''}
+
+        <div class="result-section">
+          <div class="section-title">🤖 AI Analysis</div>
+          <div class="ai-box ${aiOffline ? 'offline' : ''}">${r.ai_analysis || 'No AI analysis available.'}</div>
+        </div>
+
+        <div class="result-section">
+          <div class="section-title">💬 Recommendation</div>
+          <div class="reco-box ${level}">${r.recommendation}</div>
+        </div>
+
+      </div>
+
+      <div class="result-footer">
+        <div class="result-footer-left">Analyzed at ${r.created_at}</div>
+        <div class="version-tag">${r.version.toUpperCase()}</div>
+      </div>
+    `;
+  }
+
+  async function runAnalysis() {
+    const input = document.getElementById('emailInput').value.trim();
+    if (!input) {
+      alert('Please enter an email address or raw headers.');
+      return;
+    }
+
+    const resultCard = document.getElementById('result');
+    const content = document.getElementById('resultContent');
+
+    resultCard.classList.add('visible');
+    content.innerHTML = `
+      <div class="loading-state">
+        <div class="loading-dots">
+          <div class="ldot"></div>
+          <div class="ldot"></div>
+          <div class="ldot"></div>
+        </div>
+        <div class="loading-text">${currentVersion === 'v2' ? 'Running network investigation (WHOIS, MX, SPF, DMARC)...' : 'Analyzing signals and querying Ollama...'}</div>
+      </div>
+    `;
+    resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setLoading(true);
+
+    try {
+      const res = await fetch('/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: input, version: currentVersion }),
+      });
+      const data = await res.json();
+
+      if (data.error) {
+        content.innerHTML = `<div style="padding:24px;"><div class="error-box">❌ Error: ${data.error}</div></div>`;
+      } else {
+        content.innerHTML = renderResult(data);
+      }
+    } catch (err) {
+      content.innerHTML = `<div style="padding:24px;"><div class="error-box">❌ Failed to connect to server: ${err.message}</div></div>`;
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Allow Ctrl+Enter to submit
+  document.getElementById('emailInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && e.ctrlKey) runAnalysis();
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+# Email Sentinel V2 dependencies
+# Python 3.11+ required
+
+# V2 network investigation
+checkdmarc>=5.16.2
+dnspython>=2.4
+python-whois>=0.8
+
+# Testing
+pytest>=7.0

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Email Sentinel</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      width: 360px; min-height: 200px;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      font-size: 13px; color: #1a1a1a; background: #fff;
+    }
+    .header {
+      background: linear-gradient(135deg, #0d1b6e 0%, #1a237e 100%);
+      color: white; padding: 12px 16px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .header h1 { font-size: 15px; font-weight: 700; letter-spacing: .2px; }
+    .header .sub { font-size: 11px; opacity: 0.72; margin-top: 2px; }
+
+    /* Status dots */
+    .status-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .dot-green { background: #66BB6A; box-shadow: 0 0 5px #66BB6A; }
+    .dot-red   { background: #EF5350; }
+    .dot-blue  { background: #42A5F5; box-shadow: 0 0 5px #42A5F5; }
+    .dot-gray  { background: #90A4AE; }
+    @keyframes dotPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.4)} }
+    .dot-pulse { animation: dotPulse 1s infinite; }
+
+    .section { padding: 12px 16px; border-bottom: 1px solid #f0f0f0; }
+    .section:last-child { border-bottom: none; }
+
+    .stat-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .stat-label { color: #555; font-size: 12px; }
+    .stat-value { font-weight: 600; }
+
+    .bar-wrap { background: #eee; border-radius: 4px; height: 6px; overflow: hidden; }
+    .bar-fill  { height: 100%; border-radius: 4px; transition: width 0.5s; }
+
+    .breakdown { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 10px; }
+    .bd-item {
+      padding: 6px 10px; border-radius: 6px; font-size: 12px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .bd-low      { background: #E8F5E9; color: #2E7D32; }
+    .bd-medium   { background: #FFF3E0; color: #E65100; }
+    .bd-high     { background: #FFEBEE; color: #C62828; }
+    .bd-critical { background: #FFCDD2; color: #7B0000; }
+
+    .email-list { max-height: 180px; overflow-y: auto; }
+    .email-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 0; border-bottom: 1px solid #f5f5f5; font-size: 12px;
+    }
+    .email-item:last-child { border-bottom: none; }
+    .email-from  { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .email-score { font-weight: 600; flex-shrink: 0; }
+
+    /* Buttons */
+    .btn {
+      width: 100%; padding: 8px; border: none; border-radius: 6px;
+      font-size: 13px; cursor: pointer; font-weight: 500; transition: .15s;
+    }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-primary   { background: #1a237e; color: white; }
+    .btn-primary:hover:not(:disabled) { background: #283593; }
+    .btn-secondary { background: #f5f5f5; color: #333; }
+    .btn-secondary:hover:not(:disabled) { background: #eeeeee; }
+    .btn-danger    { background: #b71c1c; color: white; }
+    .btn-danger:hover:not(:disabled) { background: #c62828; }
+    .btn-scanning  { background: #1565c0 !important; }
+
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+    .scanning-pulse { animation: pulse 1.2s infinite; }
+
+    /* Offline */
+    .offline-msg { text-align: center; color: #888; padding: 24px 16px; }
+    .offline-msg .icon { font-size: 28px; margin-bottom: 8px; }
+    .offline-msg code {
+      font-size: 12px; background: #f5f5f5; padding: 2px 6px; border-radius: 3px; color: #333;
+    }
+
+    /* Scan timing */
+    .scan-time { font-size: 11px; color: #999; margin-top: 4px; }
+    .scan-progress {
+      font-size: 11px; color: #1565c0; margin-top: 4px;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .spinner {
+      display: inline-block; width: 10px; height: 10px;
+      border: 2px solid #90caf9; border-top-color: #1565c0;
+      border-radius: 50%; animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Spawning / loading animation ─────────────────────────── */
+    .spawning-screen {
+      text-align: center;
+      padding: 32px 16px;
+    }
+    .spawn-icon {
+      font-size: 36px;
+      margin-bottom: 12px;
+      animation: iconBounce 0.8s infinite alternate;
+    }
+    @keyframes iconBounce {
+      from { transform: translateY(0); }
+      to   { transform: translateY(-6px); }
+    }
+    .spawn-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: #1a237e;
+      margin-bottom: 16px;
+    }
+    .spawn-bar-wrap {
+      background: #e8eaf6;
+      border-radius: 8px;
+      height: 8px;
+      overflow: hidden;
+      margin: 0 auto 16px;
+      max-width: 240px;
+    }
+    .spawn-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #3949ab 0%, #42a5f5 50%, #3949ab 100%);
+      background-size: 200% 100%;
+      border-radius: 8px;
+      transition: width 0.6s ease;
+      animation: shimmer 1.5s ease-in-out infinite;
+    }
+    @keyframes shimmer {
+      0%   { background-position: 200% center; }
+      100% { background-position: -200% center; }
+    }
+    .spawn-dots { display: flex; justify-content: center; gap: 6px; }
+    .dot-anim {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #3949ab;
+      animation: dotBounce 0.8s infinite alternate;
+    }
+    @keyframes dotBounce {
+      from { transform: scale(1); opacity: 0.4; }
+      to   { transform: scale(1.5); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div style="flex:1">
+    <h1>📧 Email Sentinel</h1>
+    <div class="sub" id="headerSub">Connecting to local agent...</div>
+  </div>
+  <div class="status-dot dot-gray" id="statusDot"></div>
+</div>
+
+<div id="mainContent">
+  <div class="section offline-msg">
+    <div class="icon">⏳</div>
+    <div>Loading...</div>
+  </div>
+</div>
+
+<script src="popup.js"></script>
+</body>
+</html>

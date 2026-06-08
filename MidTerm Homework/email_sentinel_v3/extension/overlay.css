@@ -1,0 +1,24 @@
+/* overlay.css — Styles for Email Sentinel badges injected into webmail */
+
+.sentinel-badge {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  font-size: 11px !important;
+  line-height: 1.4 !important;
+  pointer-events: auto !important;
+  user-select: none !important;
+  z-index: 1 !important;
+}
+
+/* Prevent Gmail from collapsing our badges */
+.zA .sentinel-badge,
+.yP .sentinel-badge,
+.zF .sentinel-badge {
+  display: inline-flex !important;
+}
+
+/* Tooltip-like hover effect */
+.sentinel-badge:hover {
+  opacity: 0.85;
+  transform: scale(1.05);
+  transition: all 0.1s ease;
+}

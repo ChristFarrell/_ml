@@ -1,0 +1,7 @@
+{
+  "name": "com.emailsentinel.host",
+  "description": "Email Sentinel Native Messaging Host — spawns and manages monitor/run.py",
+  "path": "__REPLACED_BY_INSTALL_SCRIPT__",
+  "type": "stdio",
+  "allowed_extensions": ["email-sentinel@local"]
+}

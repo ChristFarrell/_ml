@@ -1,0 +1,59 @@
+{
+  "manifest_version": 3,
+  "name": "Email Sentinel",
+  "version": "4.0",
+  "description": "Detect dangerous and phishing emails in Gmail and other webmail clients.",
+
+  "permissions": [
+    "storage",
+    "alarms",
+    "notifications",
+    "tabs",
+    "nativeMessaging"
+  ],
+
+  "host_permissions": [
+    "http://127.0.0.1:7842/*",
+    "https://mail.google.com/*",
+    "https://outlook.live.com/*",
+    "https://outlook.office.com/*"
+  ],
+
+  "background": {
+    "scripts": ["background.js"],
+    "type": "module"
+  },
+
+  "content_scripts": [
+    {
+      "matches": [
+        "https://mail.google.com/*",
+        "https://outlook.live.com/*",
+        "https://outlook.office.com/*"
+      ],
+      "js": ["content.js"],
+      "css": ["overlay.css"],
+      "run_at": "document_idle"
+    }
+  ],
+
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "48": "icons/icon48.png",
+      "96": "icons/icon96.png"
+    },
+    "default_title": "Email Sentinel"
+  },
+
+  "icons": {
+    "48": "icons/icon48.png",
+    "96": "icons/icon96.png"
+  },
+
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "email-sentinel@local"
+    }
+  }
+}
