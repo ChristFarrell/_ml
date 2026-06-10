@@ -405,23 +405,6 @@ def build_summary(results, scan_number=0) -> str:
 
 A lightweight HTTP server on `127.0.0.1:7842`. The Firefox extension calls it directly.
 
-### Why no Flask?
-
-Using stdlib `http.server` avoids adding a dependency just for the local API. The server handles CORS preflight so the extension (`moz-extension://`) can make cross-origin requests:
-
-```python
-# monitor/api_server.py
-
-def do_OPTIONS(self):
-    self.send_response(200)
-    self._cors_headers()
-    self.end_headers()
-
-def _cors_headers(self):
-    self.send_header("Access-Control-Allow-Origin", "*")
-    self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-    self.send_header("Access-Control-Allow-Headers", "Content-Type")
-```
 
 ### `/analyze` endpoint
 

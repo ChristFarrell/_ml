@@ -1,4 +1,5 @@
 # monitor/telegram_bot.py — Send email scan summaries to Telegram
+# V3.1: each email entry now includes Ollama 1-sentence summary
 
 import urllib.request
 import json
@@ -11,7 +12,7 @@ import config
 # ── Helpers ───────────────────────────────────────────────────────
 
 def _esc(text: str) -> str:
-    """Escape HTML special chars so Telegram parse_mode=HTML never chokes."""
+    """Escape HTML special chars for Telegram parse_mode=HTML."""
     return (str(text)
             .replace("&", "&amp;")
             .replace("<", "&lt;")
@@ -24,7 +25,6 @@ def _risk_icon(level: str) -> str:
 # ── Core send ─────────────────────────────────────────────────────
 
 def send_message(text: str) -> bool:
-    """Send a plain-text/HTML message to the configured Telegram chat."""
     if not config.TELEGRAM_BOT_TOKEN or not config.TELEGRAM_CHAT_ID:
         print("[Telegram] Not configured — skipping send.")
         return False
@@ -59,8 +59,7 @@ def build_summary(results: list[dict], scan_number: int = 0) -> str:
     Build Telegram HTML summary:
       • Overall stats + safety bar
       • Top threats (up to 5)
-      • Description of first 10 emails
-    All user-supplied strings are HTML-escaped.
+      • All emails with: from, subject, score, signals, Ollama summary
     """
     total = len(results)
     if total == 0:
@@ -87,7 +86,7 @@ def build_summary(results: list[dict], scan_number: int = 0) -> str:
         f"⛔ Critical        : {counts['CRITICAL']}",
     ]
 
-    # Top threats
+    # ── Top threats section ───────────────────────────────────────
     threats = [r for r in results if r.get("risk_level") in ("HIGH", "CRITICAL")]
     if threats:
         lines += ["", f"⚠️ <b>Top threats ({len(threats)} total):</b>"]
@@ -99,33 +98,48 @@ def build_summary(results: list[dict], scan_number: int = 0) -> str:
             lines.append(f"{icon} <code>{from_}</code>")
             lines.append(f"   {subj} [{score}/100]")
 
-    # First 20 emails description
-    lines += ["", f"📧 <b>First {min(20, total)} emails:</b>"]
-    for i, r in enumerate(results[:20], 1):
-        level  = r.get("risk_level", "UNKNOWN")
-        from_  = _esc(r.get("from", "unknown"))[:50]
-        subj   = _esc(r.get("subject", "(no subject)"))[:50]
-        score  = r.get("risk_score", "?")
-        rec    = _esc(r.get("recommendation", ""))
-        sigs   = r.get("signals", [])
-        sig    = _esc(sigs[0]) if sigs else "—"
+    # ── Per-email detail section ──────────────────────────────────
+    lines += ["", f"📧 <b>All {min(total, 20)} emails:</b>"]
 
-        lines.append(
-            f"\n<b>{i}.</b> {_risk_icon(level)} <b>[{level}]</b> "
-            f"<code>{from_}</code>\n"
-            f"   {subj}\n"
-            f"   Score: {score}/100 | {sig}\n"
-            f"   {rec}"
-        )
+    for i, r in enumerate(results[:20], 1):
+        level   = r.get("risk_level", "UNKNOWN")
+        from_   = _esc(r.get("from", "unknown"))[:50]
+        subj    = _esc(r.get("subject", "(no subject)"))[:60]
+        score   = r.get("risk_score", "?")
+        sigs    = r.get("signals", [])
+        summary = _esc(r.get("summary", ""))    # Ollama 1-sentence summary
+        rec     = _esc(r.get("recommendation", ""))
+
+        # Build the entry
+        entry_lines = [
+            f"",
+            f"<b>{i}.</b> {_risk_icon(level)} <b>[{level}]</b> {score}/100",
+            f"   <code>{from_}</code>",
+            f"   📌 {subj}",
+        ]
+
+        # Ollama summary (only if available)
+        if summary:
+            entry_lines.append(f"   💬 {summary}")
+
+        # First signal (if any)
+        if sigs:
+            entry_lines.append(f"   ⚠ {_esc(sigs[0])}")
+
+        # Recommendation only for MEDIUM and above
+        if level in ("MEDIUM", "HIGH", "CRITICAL") and rec:
+            entry_lines.append(f"   → {rec}")
+
+        lines.extend(entry_lines)
 
     lines += ["", f"🕐 Next scan in {config.TELEGRAM_INTERVAL_HOURS}h"]
     return "\n".join(lines)
 
 
 def send_summary(results: list[dict], scan_number: int = 0) -> bool:
-    """Build and send the digest; split into chunks if over 4096 chars."""
+    """Build and send the digest; split into chunks if over 4000 chars."""
     text = build_summary(results, scan_number)
-    for chunk in _split_message(text, 4000):   # 4000 to be safe
+    for chunk in _split_message(text, 4000):
         if not send_message(chunk):
             print("[Telegram] Failed to send chunk.")
             return False
@@ -143,6 +157,7 @@ def send_alert(result: dict) -> bool:
     from_    = _esc(result.get("from", "?"))
     subject  = _esc(result.get("subject", "-"))
     rec      = _esc(result.get("recommendation", ""))
+    summary  = _esc(result.get("summary", ""))
     sigs     = result.get("signals", [])[:5]
     sig_text = "\n".join(f"  • {_esc(s)}" for s in sigs) if sigs else "  —"
 
@@ -151,10 +166,17 @@ def send_alert(result: dict) -> bool:
         f"<b>From:</b> <code>{from_}</code>\n"
         f"<b>Subject:</b> {subject}\n"
         f"<b>Risk score:</b> {result.get('risk_score','?')}/100\n"
-        f"<b>Level:</b> {level}\n\n"
-        f"<b>Signals:</b>\n{sig_text}\n\n"
+        f"<b>Level:</b> {level}\n"
+    )
+
+    if summary:
+        text += f"\n<b>Summary:</b> {summary}\n"
+
+    text += (
+        f"\n<b>Signals:</b>\n{sig_text}\n\n"
         f"<b>Recommendation:</b>\n{rec}"
     )
+
     return send_message(text)
 
 
