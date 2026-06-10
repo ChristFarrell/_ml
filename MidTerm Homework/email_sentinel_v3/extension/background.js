@@ -5,6 +5,14 @@ const ALARM_NAME = "sentinel-refresh";
 const REFRESH_MINUTES = 15;
 const NATIVE_HOST = "com.emailsentinel.host";
 
+// Keep service worker alive — Firefox MV3 kills it after ~30s idle
+chrome.alarms.create("keepalive", { periodInMinutes: 0.4 }); // every 24s
+
+chrome.alarms.onAlarm.addListener((alarm) => {
+  if (alarm.name === "keepalive") return; // just wakes the worker
+  if (alarm.name === ALARM_NAME) fetchAndCacheStatus();
+});
+
 // ── Startup ──────────────────────────────────────────────────────
 chrome.runtime.onInstalled.addListener(() => {
   console.log("[Sentinel] Extension installed.");

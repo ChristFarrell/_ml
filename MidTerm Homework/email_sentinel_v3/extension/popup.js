@@ -313,7 +313,9 @@ function renderOnline(container, status, results) {
 // ── Helpers ───────────────────────────────────────────────────────
 function sendMsg(type, extra = {}) {
   return new Promise(resolve => {
+    const timeout = setTimeout(() => resolve(null), 5000); // 5s timeout
     chrome.runtime.sendMessage({ type, ...extra }, resp => {
+      clearTimeout(timeout);
       if (chrome.runtime.lastError) resolve(null);
       else resolve(resp);
     });
