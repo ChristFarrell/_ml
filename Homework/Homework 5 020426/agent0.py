@@ -49,7 +49,7 @@ def check_command_security(command: str) -> bool:
 # ─── Configuration ───
 
 WORKSPACE = os.path.expanduser("~/.agent0")
-MODEL = "llama3.2:1b"
+MODEL = "minimax-m2.5:cloud"
 MAX_TURNS = 5
 
 # ─── Memory ───
