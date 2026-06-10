@@ -136,8 +136,8 @@ def scan_inbox(use_v2: bool = False) -> list[dict]:
 
         total = len(ids_to_scan)
         _log(f"✓ Found {len(all_ids)} emails total — scanning latest {total}")
-        _log(f"  V2 network analysis : {'enabled' if use_v2 else 'disabled'}")
-        _log(f"  Ollama summarization: enabled (8s timeout per email)")
+        _log(f"✓ V2 network analysis : {'enabled' if use_v2 else 'disabled'}")
+        _log(f"  Ollama summarization: enabled (15s timeout per email)")
         _log(f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
 
         for i, msg_id in enumerate(ids_to_scan):

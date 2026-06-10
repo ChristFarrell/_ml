@@ -49,7 +49,7 @@ def main():
     print(f"  Scan limit: {config.IMAP_SCAN_LIMIT} emails per cycle")
     print(f"  Telegram  : every {config.TELEGRAM_INTERVAL_HOURS} hours")
     print(f"  API       : http://{config.API_HOST}:{config.API_PORT}")
-    print(f"  V2 mode   : always enabled")
+    print(f"  V2 mode   : {'enabled' if args.v2 else 'disabled'}")
     print("=" * 54)
 
     api_server.start_background()

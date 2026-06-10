@@ -1,10 +1,3 @@
-# config.py — Email Sentinel Configuration (V1 + V2 + V3)
-#
-# Sensitive values (IMAP, Telegram, API keys) are loaded from .env
-# Non-sensitive values (lists, thresholds) stay here directly.
-#
-# Setup: copy .env.example to .env and fill in your credentials.
-
 import os
 from pathlib import Path
 from dotenv import load_dotenv
@@ -87,12 +80,12 @@ IMAP_PORT       = _int("IMAP_PORT",   993)
 IMAP_USER       = _get("IMAP_USER",   "")
 IMAP_PASSWORD   = _get("IMAP_PASSWORD", "")
 IMAP_FOLDER     = "INBOX"
-IMAP_SCAN_LIMIT = _int("IMAP_SCAN_LIMIT", 20)
+IMAP_SCAN_LIMIT = _int("IMAP_SCAN_LIMIT", 10)
 
 # ── V3: Telegram ─────────────────────────────────────────────────
 TELEGRAM_BOT_TOKEN      = _get("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID        = _get("TELEGRAM_CHAT_ID",   "")
-TELEGRAM_INTERVAL_HOURS = _int("TELEGRAM_INTERVAL_HOURS", 6)
+TELEGRAM_INTERVAL_HOURS = _int("TELEGRAM_INTERVAL_HOURS", 1)
 
 # ── V3: Local API (used by Firefox extension) ─────────────────────
 API_HOST = _get("API_HOST", "127.0.0.1")

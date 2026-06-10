@@ -115,7 +115,7 @@ function renderSpawning(container, phase) {
         <div class="spawn-bar-fill" style="width:${Math.min(100, (phase + 1) * 25)}%"></div>
       </div>
       <div style="font-size:11px;color:#9fa8da;margin-bottom:10px">
-        ${elapsed}s — scan 20 email butuh ~30 detik
+        ${elapsed}s — scan 10 email need ~30 detik
       </div>
       <div class="spawn-dots">
         <span class="dot-anim"></span>

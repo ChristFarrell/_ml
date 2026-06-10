@@ -78,7 +78,7 @@ def spawn_agent():
         log_fd = open(LOG_FILE, "a", buffering=1)  # line-buffered → log muncul realtime
 
         _agent_proc = subprocess.Popen(
-            [python_exec, "-u", RUN_PY],   # -u = unbuffered Python output
+            [python_exec, "-u", RUN_PY, "--v2"],   # -u = unbuffered Python output
             cwd=PROJECT_DIR,
             stdout=log_fd,
             stderr=log_fd,
