@@ -61,8 +61,6 @@ def signals_to_features(signals, intel=None) -> List[float]:
     return vec
 ```
 
-Features 11–14 (SPF, DMARC, MX, domain age) are only non-zero when V2 investigation runs. Without V2 they default to 0 — the model still works, just with less information.
-
 ### Two Models in Ensemble (`ml/classifier.py`)
 
 Two classifiers are trained simultaneously and their predictions averaged:
