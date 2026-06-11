@@ -220,10 +220,13 @@
       border: 2px solid var(--gray-200);
       border-radius: 10px;
       padding: 14px 16px;
-      resize: vertical;
-      min-height: 100px;
+      resize: none;
+      min-height: 52px;
+      max-height: 420px;
+      overflow-y: auto;
       transition: border-color 0.2s;
       line-height: 1.5;
+      display: block;
     }
     textarea:focus {
       outline: none;
@@ -688,7 +691,7 @@
       return `<div class="no-signals">✅ No suspicious signals detected locally.</div>`;
     }
     return `<ul class="signal-list">` + notes.map(n => {
-      const isSafe = n.toLowerCase().includes('free email') || n.toLowerCase().includes('gratis');
+      const isSafe = n.toLowerCase().includes('free email');
       return `<li class="signal-item ${isSafe ? 'safe' : ''}">
         <span class="signal-icon">${isSafe ? 'ℹ️' : '⚠️'}</span>
         <span>${n}</span>
@@ -836,8 +839,17 @@
     }
   }
 
+  // Auto-grow textarea
+  const ta = document.getElementById('emailInput');
+  function autoGrow() {
+    ta.style.height = 'auto';
+    ta.style.height = Math.min(ta.scrollHeight, 420) + 'px';
+  }
+  ta.addEventListener('input', autoGrow);
+  autoGrow();
+
   // Allow Ctrl+Enter to submit
-  document.getElementById('emailInput').addEventListener('keydown', (e) => {
+  ta.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && e.ctrlKey) runAnalysis();
   });
 </script>
